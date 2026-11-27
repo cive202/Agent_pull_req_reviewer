@@ -150,7 +150,8 @@ class QueueItem(BaseModel):
     pr_number: int
     pr_title: str
     status: str
-    # needs_human_review=True means low confidence — human should inspect before posting.
+    # needs_human_review=True means low confidence — human should inspect before
+    # posting.
     needs_human_review: bool
     human_review_reason: str
     overall_confidence: Optional[float] = None

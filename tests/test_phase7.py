@@ -27,6 +27,7 @@
 #   8. PRReviewState has pr_title + author_login fields (metadata wired into state)
 #   9. Rate limit warning fires when X-RateLimit-Remaining < 100
 
+import importlib
 import asyncio
 import json
 import sys
@@ -180,7 +181,8 @@ def run_all_tests():
 
     # ─── Test 1: PRMetadata parses GitHub JSON correctly ─────────────────────
     async def test_pr_metadata_parsing():
-        from backend.integrations.github_client import GitHubClient
+        # Import check: GitHubClient must exist.
+        importlib.import_module("backend.integrations.github_client").GitHubClient
         from backend.integrations.github_models import PRMetadata
 
         def handler(request: httpx.Request) -> httpx.Response:
@@ -205,7 +207,8 @@ def run_all_tests():
 
     # ─── Test 2: get_pr_diff returns raw diff string ──────────────────────────
     async def test_get_pr_diff():
-        from backend.integrations.github_client import GitHubClient
+        # Import check: GitHubClient must exist.
+        importlib.import_module("backend.integrations.github_client").GitHubClient
 
         def handler(request: httpx.Request) -> httpx.Response:
             return mock_response(200, SAMPLE_DIFF)
@@ -226,7 +229,8 @@ def run_all_tests():
 
     # ─── Test 3: get_pr_files returns list[PRFile] ────────────────────────────
     async def test_get_pr_files():
-        from backend.integrations.github_client import GitHubClient
+        # Import check: GitHubClient must exist.
+        importlib.import_module("backend.integrations.github_client").GitHubClient
         from backend.integrations.github_models import PRFile, PRFileStatus
 
         def handler(request: httpx.Request) -> httpx.Response:

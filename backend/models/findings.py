@@ -1,6 +1,7 @@
 # backend/models/findings.py
 #
-# The AgentFinding model — the structured output contract between the LLM and our system.
+# The AgentFinding model — the structured output contract between the LLM and our
+# system.
 #
 # WHAT THIS FILE IS:
 # When a specialist agent (SecurityAgent, QualityAgent, etc.) calls an LLM,
@@ -10,7 +11,8 @@
 # THE LLM SIDE:
 # We send the LLM a system prompt that says:
 #   "You MUST respond with a JSON array. Each element must match this schema:
-#    {severity, category, summary, file_path, line_start, line_end, suggestion, confidence}"
+#    {severity, category, summary, file_path, line_start, line_end, suggestion,
+#    confidence}"
 # The LLM tries to follow that schema. We then Pydantic-validate the response.
 # If validation fails -> output guardrail kicks in (see base_agent.py).
 #
@@ -83,8 +85,10 @@ class AgentFindingRaw(BaseModel):
     line_end: int | None = None
 
     # A concrete suggestion for how to fix the issue.
-    # e.g. "Use parameterized queries: cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))"
-    # Optional — some findings (e.g. "missing tests") are hard to suggest a specific fix.
+    # e.g. "Use parameterized queries: cursor.execute('SELECT * FROM users WHERE id =
+    # %s', (user_id,))"
+    # Optional — some findings (e.g. "missing tests") are hard to suggest a specific
+    # fix.
     suggestion: str | None = None
 
     # How confident the agent is in this specific finding (0.0 - 1.0).
@@ -140,7 +144,8 @@ class AgentFindingRaw(BaseModel):
         Converts this raw (lenient) model to a strict AgentFinding.
 
         Args:
-            agent_type: the agent that produced this finding ("security", "quality", etc.)
+            agent_type: the agent that produced this finding ("security", "quality", \
+etc.)
                         We pass this in because the LLM doesn't know its own type.
 
         Returns:
@@ -191,7 +196,8 @@ class AgentFinding(BaseModel):
       - Returned in API responses (Phase 2)
       - Posted as GitHub review comments (Phase 7)
 
-    ALL FIELDS ARE TYPED AND REQUIRED (except the optional ones marked with None default).
+    ALL FIELDS ARE TYPED AND REQUIRED (except the optional ones marked with None \
+default).
     This is the real contract — no field can be the wrong type here.
 
     WHAT EACH FIELD MEANS:

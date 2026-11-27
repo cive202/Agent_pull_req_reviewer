@@ -71,7 +71,8 @@ def build_review_graph():
     Constructs and compiles the PR review StateGraph.
 
     RETURNS a compiled LangGraph graph — a callable object.
-    To run a review: await graph.ainvoke(initial_state, config={"configurable": {"thread_id": workflow_id}})
+    To run a review: await graph.ainvoke(initial_state, config={"configurable": \
+{"thread_id": workflow_id}})
 
     WHY IS THIS A FUNCTION AND NOT MODULE-LEVEL CODE?
     If we built the graph at module import time, we could not inject the checkpointer
@@ -104,7 +105,8 @@ def build_review_graph():
     # fan_out_agents -> aggregate_results: always runs after all agents finish
     workflow.add_edge("fan_out_agents", "aggregate_results")
 
-    # aggregate_results -> post_review: always runs (post_review handles HITL internally)
+    # aggregate_results -> post_review: always runs (post_review handles HITL
+    # internally)
     # NOTE: We could add a conditional edge here to route to a HITL node instead.
     # For Phase 4, post_review handles both paths internally.
     # Phase 19 will split this into: post_review (auto) vs hitl_queue (human).

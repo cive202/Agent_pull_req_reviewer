@@ -27,7 +27,7 @@ from typing import Optional
 @dataclass(frozen=True)
 class WorkflowContext:
     workflow_id: Optional[str]
-    agent_type: str    # "security", "quality", "system", etc.
+    agent_type: str  # "security", "quality", "system", etc.
 
 
 _DEFAULT = WorkflowContext(workflow_id=None, agent_type="system")

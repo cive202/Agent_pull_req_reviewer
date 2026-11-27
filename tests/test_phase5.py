@@ -1,6 +1,7 @@
 """Phase 5 smoke test."""
 
 import asyncio
+import importlib
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 2)[0])
@@ -11,7 +12,6 @@ from backend.agents.base_agent import (
     _truncate_to_budget,
     _build_system_prompt,
     _apply_output_guardrail,
-    AgentOutput,
 )
 from backend.tools.model_router import get_model_config
 from backend.agents.security_agent import SecurityAgent
@@ -20,6 +20,9 @@ from backend.agents.test_agent import TestAgent
 from backend.agents.docs_agent import DocsAgent
 from backend.tools.llm_client import LLMResponse
 from unittest.mock import AsyncMock, MagicMock
+
+# Import check: AgentOutput must exist.
+importlib.import_module("backend.agents.base_agent").AgentOutput
 
 print("PHASE 5 SMOKE TEST")
 print("=" * 60)

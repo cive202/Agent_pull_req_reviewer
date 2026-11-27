@@ -21,6 +21,7 @@ class PRReviewAgentError(Exception):
     This lets callers catch all our exceptions with a single except clause
     if they want to, while still being able to catch specific ones.
     """
+
     pass
 
 
@@ -28,12 +29,14 @@ class PRReviewAgentError(Exception):
 # Webhook Exceptions
 # -----------------------------------------------------------------------------
 
+
 class WebhookValidationError(PRReviewAgentError):
     """
     Raised when a GitHub webhook fails HMAC signature validation.
     This means the request did not come from GitHub, or the secret is wrong.
     The webhook receiver should return HTTP 401 when this is raised.
     """
+
     pass
 
 
@@ -44,12 +47,14 @@ class WebhookParseError(PRReviewAgentError):
     or we received an event type we do not support.
     The webhook receiver should return HTTP 400 when this is raised.
     """
+
     pass
 
 
 # -----------------------------------------------------------------------------
 # Job Queue Exceptions
 # -----------------------------------------------------------------------------
+
 
 class JobEnqueueError(PRReviewAgentError):
     """
@@ -58,6 +63,7 @@ class JobEnqueueError(PRReviewAgentError):
     The webhook receiver should return HTTP 503 when this is raised
     so GitHub knows to retry the webhook delivery.
     """
+
     pass
 
 
@@ -67,6 +73,7 @@ class DuplicateJobError(PRReviewAgentError):
     This is the idempotency check - GitHub replays webhooks on timeout.
     Not an error per se - the caller should return HTTP 200 silently.
     """
+
     pass
 
 
@@ -77,6 +84,7 @@ class DuplicateWebhookError(PRReviewAgentError):
     Includes the idempotency_key so the caller can log which event was skipped.
     Not an error — the caller should return HTTP 200 silently.
     """
+
     def __init__(self, message: str, idempotency_key: str | None = None):
         super().__init__(message)
         self.idempotency_key = idempotency_key
@@ -86,11 +94,13 @@ class DuplicateWebhookError(PRReviewAgentError):
 # Orchestrator Exceptions
 # -----------------------------------------------------------------------------
 
+
 class WorkflowError(PRReviewAgentError):
     """
     Raised when the LangGraph workflow encounters an unrecoverable error.
     Includes the workflow_id so we can look up the failed run in the database.
     """
+
     def __init__(self, message: str, workflow_id: str | None = None):
         super().__init__(message)
         self.workflow_id = workflow_id
@@ -101,6 +111,7 @@ class WorkflowTimeoutError(WorkflowError):
     Raised when the agent workflow exceeds its maximum allowed time.
     This is the circuit breaker for infinite agent loops.
     """
+
     pass
 
 
@@ -110,6 +121,7 @@ class WorkflowNotFoundError(WorkflowError):
     Can occur if a job is dequeued after its checkpoint expired, or if the
     workflow_id was generated incorrectly.
     """
+
     pass
 
 
@@ -117,12 +129,14 @@ class WorkflowNotFoundError(WorkflowError):
 # Agent Exceptions
 # -----------------------------------------------------------------------------
 
+
 class AgentError(PRReviewAgentError):
     """
     Raised when a specialist sub-agent (security, quality, test, docs)
     fails to complete its analysis. Includes the agent name so we know
     which one failed.
     """
+
     def __init__(self, message: str, agent_name: str | None = None):
         super().__init__(message)
         self.agent_name = agent_name
@@ -134,6 +148,7 @@ class AgentOutputValidationError(AgentError):
     This means the LLM returned something in the wrong format.
     The caller should retry with a stricter output prompt.
     """
+
     pass
 
 
@@ -141,11 +156,13 @@ class AgentOutputValidationError(AgentError):
 # GitHub API Exceptions
 # -----------------------------------------------------------------------------
 
+
 class GitHubAPIError(PRReviewAgentError):
     """
     Raised when the GitHub REST API returns an error response.
     Includes the HTTP status code so the caller can decide whether to retry.
     """
+
     def __init__(self, message: str, status_code: int | None = None):
         super().__init__(message)
         self.status_code = status_code
@@ -156,6 +173,7 @@ class GitHubRateLimitError(GitHubAPIError):
     Raised when we hit GitHub's API rate limit (HTTP 429).
     The caller should back off and retry after the reset time.
     """
+
     def __init__(self, message: str, retry_after_seconds: int | None = None):
         super().__init__(message, status_code=429)
         self.retry_after_seconds = retry_after_seconds
@@ -165,11 +183,13 @@ class GitHubRateLimitError(GitHubAPIError):
 # Memory / Storage Exceptions
 # -----------------------------------------------------------------------------
 
+
 class MemoryStoreError(PRReviewAgentError):
     """
     Raised when a read or write to any memory store (Redis, Qdrant, Postgres) fails.
     Includes the store name so we know which one is down.
     """
+
     def __init__(self, message: str, store: str | None = None):
         super().__init__(message)
         self.store = store
@@ -179,17 +199,20 @@ class MemoryStoreError(PRReviewAgentError):
 # Configuration Exceptions
 # -----------------------------------------------------------------------------
 
+
 class ConfigurationError(PRReviewAgentError):
     """
     Raised when a required environment variable is missing or has an invalid value.
     This should only happen at startup. If it happens at runtime, something is very wrong.
     """
+
     pass
 
 
 # -----------------------------------------------------------------------------
 # Prompt Registry Exceptions
 # -----------------------------------------------------------------------------
+
 
 class PromptNotFoundError(PRReviewAgentError):
     """
@@ -209,6 +232,7 @@ class PromptNotFoundError(PRReviewAgentError):
         version:    e.g. "v1", "latest"
         message:    Human-readable description of what is missing.
     """
+
     def __init__(self, agent_type: str, version: str, message: str):
         super().__init__(message)
         self.agent_type = agent_type

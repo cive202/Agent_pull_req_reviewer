@@ -463,7 +463,8 @@ async def ingest_repository(repo_full_name: str) -> dict[str, int]:
             # Stage 4c: upsert into Tiger Cloud (code_chunks table, DiskANN index)
             # TIGER: was upsert_code_chunks() to Qdrant.
             # Now: TigerMemoryClient.upsert_chunks() with CodeChunk dataclass.
-            # Same file-as-unit chunking strategy. Payload stays in the content + symbol fields.
+            # Same file-as-unit chunking strategy. Payload stays in the content + symbol
+            # fields.
             # (RAG-Architecture.md: "Every chunk must carry provenance.")
             chunk = CodeChunk(
                 repo=repo_full_name,

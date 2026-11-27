@@ -348,7 +348,8 @@ class TestIdempotency:
         assert len(calls) == 1
 
     def test_duplicate_key_returns_cached_result(self):
-        """Second call with the same key must return cached result without calling fn."""
+        """Second call with the same key must return cached result without calling \
+fn."""
         store = InMemoryIdempotencyStore()
         calls = []
 

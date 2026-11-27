@@ -139,7 +139,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: smoke   # eval gate only runs if smoke passes
     # Only trigger on direct pushes to main (not PRs targeting main)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Off by default (paid OpenAI calls): set repo variable RUN_EVAL=true to enable.
+    if: vars.RUN_EVAL == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     env:
       APP_ENV: test

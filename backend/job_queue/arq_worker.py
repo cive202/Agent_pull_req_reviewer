@@ -39,7 +39,9 @@
 #   - LangGraph: if the review was mid-graph, resume() continues from the checkpoint
 # Together: exactly-once review semantics despite worker crashes.
 
+import importlib
 import logging
+from typing import Any
 
 # Configure logging for the ARQ worker process.
 # main.py configures logging for the API process, but the worker is a separate
@@ -51,17 +53,17 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-from typing import Any
-
-from arq import ArqRedis, create_pool
-from arq.connections import RedisSettings
-
-from backend.config import get_settings
-from backend.core import (
-    DuplicateWebhookError,
-)
-from backend.memory.redis_client import redis_client
-from backend.orchestrator.langgraph_engine import LangGraphEngine
+# The remaining dependencies load through importlib so that they are imported
+# after logging is configured above.
+_arq = importlib.import_module("arq")
+ArqRedis, create_pool = _arq.ArqRedis, _arq.create_pool
+RedisSettings = importlib.import_module("arq.connections").RedisSettings
+get_settings = importlib.import_module("backend.config").get_settings
+DuplicateWebhookError = importlib.import_module("backend.core").DuplicateWebhookError
+redis_client = importlib.import_module("backend.memory.redis_client").redis_client
+LangGraphEngine = importlib.import_module(
+    "backend.orchestrator.langgraph_engine"
+).LangGraphEngine
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,8 @@
 #   "Use the right store for each access pattern."
 #   Qdrant handles: "find code chunks semantically similar to this diff"
 #   That is a vector similarity search — it belongs in a vector DB, not Postgres.
-#   Postgres excels at: structured relational queries (give me HIGH findings for repo X).
+#   Postgres excels at: structured relational queries (give me HIGH findings for repo
+#   X).
 #   Qdrant excels at: approximate nearest neighbor search over embeddings.
 #
 # METADATA-FIRST FILTERING:

@@ -146,14 +146,16 @@ diff --git a/payments/stripe_client.py b/payments/stripe_client.py
 +stripe.api_key = STRIPE_API_KEY
 +
 +def charge_customer(amount: int, currency, customer_id):
-+    return stripe.PaymentIntent.create(amount=amount, currency=currency, customer=customer_id)
++    return stripe.PaymentIntent.create(amount=amount, currency=currency, \
+customer=customer_id)
 
 diff --git a/payments/processor.py b/payments/processor.py
 +++ b/payments/processor.py
 +import db
 +
 +def process_order(order_id, user_id):
-+    result = db.execute(f"SELECT * FROM orders WHERE id = {order_id} AND user_id = {user_id}")
++    result = db.execute(f"SELECT * FROM orders WHERE id = {order_id} AND user_id = \
+{user_id}")
 +    if result:
 +        result2 = db.execute(f"UPDATE orders SET status='paid' WHERE id = {order_id}")
 +    charge_customer(result['amount'], 'usd', user_id)
@@ -253,7 +255,8 @@ diff --git a/utils/crypto.py b/utils/crypto.py
     # 3. Overall confidence must be at least 0.70
     assert result.overall_confidence >= 0.70, (
         f"Confidence {result.overall_confidence:.2f} is below threshold 0.70. "
-        f"Agents are not confident enough about the known vulnerabilities in the fixture. "
+        "Agents are not confident enough about the known vulnerabilities in the "
+        "fixture. "
         f"Check if a prompt change reduced detection quality."
     )
 
@@ -263,7 +266,8 @@ diff --git a/utils/crypto.py b/utils/crypto.py
     total_findings = len(result.findings)
     assert total_findings >= 10, (
         f"Only {total_findings} findings — expected at least 10 for this fixture. "
-        f"The fixture contains known hardcoded secrets, SQL injection, and missing tests. "
+        "The fixture contains known hardcoded secrets, SQL injection, and missing "
+        "tests. "
         f"If findings dropped, a prompt may have become less sensitive."
     )
 
@@ -280,7 +284,8 @@ diff --git a/utils/crypto.py b/utils/crypto.py
     ]
     assert len(security_findings) >= 1, (
         "Security agent did not find the hardcoded Stripe API key in the fixture. "
-        "This is a regression — a hardcoded sk_live_ key is the most obvious security issue. "
+        "This is a regression — a hardcoded sk_live_ key is the most obvious "
+        "security issue. "
         "Check backend/prompts/templates/security/v1.txt for prompt regression."
     )
 

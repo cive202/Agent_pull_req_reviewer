@@ -44,7 +44,8 @@ def parse_webhook_payload(
         None if this is an event type we should ignore (push, star, fork, etc.)
 
     Raises:
-        WebhookParseError: if the payload cannot be parsed or is missing required fields.
+        WebhookParseError: if the payload cannot be parsed or is missing required \
+fields.
 
     Example:
         event = parse_webhook_payload(
@@ -85,7 +86,8 @@ def parse_webhook_payload(
         event = WebhookEvent.model_validate(payload_dict)
     except Exception as e:
         raise WebhookParseError(
-            f"GitHub webhook payload is missing required fields or has unexpected format. "
+            "GitHub webhook payload is missing required fields or has unexpected "
+            "format. "
             f"Details: {e}"
         ) from e
 

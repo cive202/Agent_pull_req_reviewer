@@ -48,11 +48,14 @@
 #   ---
 #
 # This format was chosen because:
-#   1. Agents get a labeled context block they can cite ("see prior context for auth.py")
-#   2. File names are explicit — agents can say "auth.py was seen before and had pattern X"
+#   1. Agents get a labeled context block they can cite ("see prior context for
+#      auth.py")
+#   2. File names are explicit — agents can say "auth.py was seen before and had pattern
+#      X"
 #   3. PR number is included — human reviewers can trace the provenance
 #
-# (RAG-Architecture.md: "Citation grounding: every retrieved chunk must carry provenance.")
+# (RAG-Architecture.md: "Citation grounding: every retrieved chunk must carry
+# provenance.")
 
 import logging
 
@@ -153,7 +156,10 @@ async def retrieve_context_for_diff(
     except Exception as e:
         # Defensive catch for unexpected errors (e.g. network timeout not wrapped)
         logger.warning(
-            "retrieve_context | embed_unexpected_error | repo=%s error=%s: %s -> returning ''",
+            (
+                "retrieve_context | embed_unexpected_error | repo=%s error=%s: %s -> "
+                "returning ''"
+            ),
             repo_full_name,
             type(e).__name__,
             e,
@@ -181,7 +187,10 @@ async def retrieve_context_for_diff(
 
     if not relevant_results:
         logger.debug(
-            "retrieve_context | no_relevant_results | repo=%s score_threshold=%.2f -> ''",
+            (
+                "retrieve_context | no_relevant_results | repo=%s score_threshold=%.2f "
+                "-> ''"
+            ),
             repo_full_name,
             MIN_SIMILARITY_SCORE,
         )

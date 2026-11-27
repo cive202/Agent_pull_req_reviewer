@@ -220,17 +220,17 @@ backend/
   orchestrator/     LangGraph graph, nodes, engine
   reliability/      Circuit breakers, retries
   tools/            Tool registry, Docker sandbox
+  prompts/          Versioned prompt files per agent
+  evaluation/       Golden dataset, judge, regression gate
 
 docs/
-  adr/              Architecture Decision Records (ADR-001 to ADR-003)
+  adr/              Architecture Decision Records (ADR-001 to ADR-005)
 
 scripts/
   migrations/       2026-06-tiger-init.sql — idempotent schema DDL
   setup-tiger-mcp.md
 
-eval/               Golden dataset + regression configs
 frontend/           Next.js dashboard
-prompts/            Versioned prompt files per agent
 ```
 
 ---

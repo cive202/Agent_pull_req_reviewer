@@ -82,7 +82,8 @@ class AgentResultState(TypedDict):
     # If below settings.confidence_threshold -> goes to HITL queue.
     confidence: float
 
-    # Phase 8: per-agent verdict derived from findings (AgentVerdict enum value as string).
+    # Phase 8: per-agent verdict derived from findings (AgentVerdict enum value as
+    # string).
     # Values: "approve", "request_changes", "critical_block"
     # Stored as string (not enum) to keep state.py dependency-free.
     # The aggregator reads this to apply the Safety-Threshold Rule.

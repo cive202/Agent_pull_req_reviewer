@@ -571,8 +571,10 @@ async def test_rule1_security_failure_hitl():
 @pytest.mark.asyncio
 async def test_rule4_too_few_agents_hitl():
     """
-    Only 1 agent succeeded (quality) + security is ok but quality only gives us 1 success.
-    Wait — security must succeed for Rule 4 to be checked. Let's have security + 0 others.
+    Only 1 agent succeeded (quality) + security is ok but quality only gives us 1 \
+success.
+    Wait — security must succeed for Rule 4 to be checked. Let's have security + 0 \
+others.
     """
     from backend.orchestrator.nodes import aggregate_results
     from backend.models.enums import ReviewVerdict

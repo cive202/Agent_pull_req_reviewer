@@ -90,7 +90,9 @@ async def list_reviews_endpoint(
     # Optional filters
     repo: str | None = Query(
         default=None,
-        description="Filter by repository (e.g. 'owner/repo'). Omit to return all repos.",
+        description=(
+            "Filter by repository (e.g. 'owner/repo'). Omit to return all repos."
+        ),
         examples=["acme-corp/payment-service"],
     ),
     status_filter: str | None = Query(
@@ -232,7 +234,10 @@ async def get_review_endpoint(
     # of this request. SQLAlchemy does not flush unless we call commit().
     if live_status and live_status != record.status:
         logger.debug(
-            "GET /api/v1/reviews/%s | overlaying Redis status=%s over Postgres status=%s",
+            (
+                "GET /api/v1/reviews/%s | overlaying Redis status=%s over Postgres "
+                "status=%s"
+            ),
             review_id,
             live_status,
             record.status,

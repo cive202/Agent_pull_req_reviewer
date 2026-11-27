@@ -132,7 +132,8 @@ class AgentEvent:
 
     review_id: str
     agent: str  # "security" | "quality" | "tests" | "docs" | "aggregator" | "system"
-    event_type: str  # "span.start" | "span.end" | "llm.call" | "tool.call" | "decision" | "escalation"
+    # "span.start" | "span.end" | "llm.call" | "tool.call" | "decision" | "escalation"
+    event_type: str
     ts: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     span_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     parent_span: str | None = None
@@ -215,7 +216,10 @@ async def emit_agent_event(pool: asyncpg.Pool | None, event: AgentEvent) -> None
     except Exception as exc:  # noqa: BLE001
         # Never let observability failures crash the review workflow.
         logger.error(
-            "emit_agent_event failed (non-fatal) | review_id=%s agent=%s event=%s error=%s",
+            (
+                "emit_agent_event failed (non-fatal) | review_id=%s agent=%s event=%s "
+                "error=%s"
+            ),
             event.review_id,
             event.agent,
             event.event_type,

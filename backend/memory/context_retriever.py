@@ -134,7 +134,9 @@ async def retrieve_context_for_diff(
         logger.debug("retrieve_context | empty_repo -> returning ''")
         return ""
 
-    cfg = settings or get_settings()
+    # Load settings when none are injected, so configuration errors surface here.
+    if not settings:
+        get_settings()
 
     # Step 1: Build the query text.
     # We use the first MAX_QUERY_CHARS of the diff as our semantic query.

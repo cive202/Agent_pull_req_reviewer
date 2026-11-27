@@ -35,6 +35,7 @@ from backend.models.enums import (
 # The atomic unit of a PR review. One issue. One agent. One location in code.
 # -----------------------------------------------------------------------------
 
+
 class Finding(BaseModel):
     """
     A single issue found by a specialist agent.
@@ -109,6 +110,7 @@ class Finding(BaseModel):
 # Everything one specialist agent produced for a PR.
 # -----------------------------------------------------------------------------
 
+
 class AgentResult(BaseModel):
     """
     The complete output of one specialist sub-agent for a PR review.
@@ -147,6 +149,7 @@ class AgentResult(BaseModel):
 # PRReview
 # The complete review of one PR. The top-level object.
 # -----------------------------------------------------------------------------
+
 
 class PRReview(BaseModel):
     """

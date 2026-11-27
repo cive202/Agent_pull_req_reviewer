@@ -217,11 +217,14 @@ class LLMClient:
         Args:
             model:         OpenAI model name. e.g. "gpt-4o-mini"
             messages:      List of {role, content} dicts. role is "user" or "assistant".
-                           Do NOT include the system message here — pass it as system_prompt.
-            system_prompt: The agent's instructions. Sent as {"role": "system", "content": ...}
+                           Do NOT include the system message here — pass it as \
+system_prompt.
+            system_prompt: The agent's instructions. Sent as {"role": "system", \
+"content": ...}
                            Kept separate from messages so we can update the prompt
                            without touching the message history.
-            json_mode:     If True, tells OpenAI to return valid JSON (enforced server-side).
+            json_mode:     If True, tells OpenAI to return valid JSON (enforced \
+server-side).
                            Always True for our structured output calls.
             max_tokens:    Maximum tokens in the response. Default 2048 is enough for
                            a list of 10-15 findings with summaries and suggestions.
@@ -258,7 +261,8 @@ class LLMClient:
                     messages=full_messages,
                     response_format=response_format,
                     max_tokens=max_tokens,
-                    temperature=0.1,  # low temperature = more deterministic, less hallucination
+                    # low temperature = more deterministic, less hallucination
+                    temperature=0.1,
                 )
 
                 latency = time.monotonic() - start
@@ -394,7 +398,8 @@ class LLMClient:
             messages:     List of {role, content} dicts.
             system_prompt: Agent instructions + JSON format requirement.
             max_tokens:   Maximum tokens in the response.
-            api_key:      Anthropic API key. If None, reads from ANTHROPIC_API_KEY env var.
+            api_key:      Anthropic API key. If None, reads from ANTHROPIC_API_KEY env \
+var.
 
         Returns:
             LLMResponse — same shape as call_openai().
@@ -542,7 +547,10 @@ class LLMClient:
                     await asyncio.sleep(delay)
 
         raise AgentError(
-            f"Anthropic call failed after {self.MAX_RETRIES + 1} attempts: {last_error}",
+            (
+                f"Anthropic call failed after {self.MAX_RETRIES + 1} attempts: "
+                f"{last_error}"
+            ),
             agent_name=model,
         ) from last_error
 

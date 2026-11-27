@@ -21,9 +21,11 @@
 #   2. REQUEST_CHANGES verdict -> PostReviewPayload has event=REQUEST_CHANGES
 #   3. Findings with file_path+line_start become inline ReviewComment objects
 #   4. Findings without file_path do NOT become inline comments
-#   5. Successful GitHub post + Postgres save -> review_posted=True, github_review_id set
+#   5. Successful GitHub post + Postgres save -> review_posted=True, github_review_id
+#      set
 #   6. GitHubAPIError (5xx after retries) -> review_posted=False, no crash
-#   7. Postgres failure AFTER successful GitHub post -> review_posted=True (fault not failure)
+#   7. Postgres failure AFTER successful GitHub post -> review_posted=True (fault not
+#      failure)
 #   8. needs_human_review=True -> GitHub API never called, review_posted=False
 #   9. Review summary body contains severity counts + confidence score + verdict badge
 
@@ -383,7 +385,8 @@ def run_all_tests():
             result = await post_review(state)
 
         assert result["review_posted"] is False, (
-            f"GitHubAPIError should produce review_posted=False, got {result['review_posted']}"
+            "GitHubAPIError should produce review_posted=False, got "
+            f"{result['review_posted']}"
         )
         assert result["github_review_id"] is None
 
@@ -454,7 +457,10 @@ def run_all_tests():
         assert result["github_review_id"] == 99002
 
     assert_test(
-        "Postgres failure after GitHub success -> review_posted=True (fault not failure)",
+        (
+            "Postgres failure after GitHub success -> review_posted=True (fault not "
+            "failure)"
+        ),
         test_postgres_failure_does_not_undo_github_post,
     )
 

@@ -152,7 +152,10 @@ async def build_context(state: PRReviewState) -> dict[str, Any]:
             # Guard: if the PR has no changed files, skip the expensive diff fetch.
             if metadata.changed_files_count == 0:
                 logger.warning(
-                    "build_context | no_changed_files | repo=%s pr=%d — skipping diff fetch",
+                    (
+                        "build_context | no_changed_files | repo=%s pr=%d — skipping "
+                        "diff fetch"
+                    ),
                     repo,
                     pr_number,
                 )
@@ -304,7 +307,10 @@ async def _run_single_agent(
 
         duration = time.monotonic() - start_time
         logger.info(
-            "agent_complete | agent=%s workflow=%s duration=%.2fs findings=%d verdict=%s",
+            (
+                "agent_complete | agent=%s workflow=%s duration=%.2fs findings=%d "
+                "verdict=%s"
+            ),
             agent_type,
             state["workflow_id"],
             duration,
@@ -318,7 +324,8 @@ async def _run_single_agent(
             error_message="",
             duration_seconds=round(duration, 3),
             findings=findings,
-            confidence=agent_confidence,  # Phase 8: use agent's own confidence, not recomputed
+            # Phase 8: use agent's own confidence, not recomputed
+            confidence=agent_confidence,
             per_verdict=per_verdict_str,  # Phase 8: persist per-agent verdict in state
         )
 
@@ -340,7 +347,8 @@ async def _run_single_agent(
             duration_seconds=round(duration, 3),
             findings=[],
             confidence=0.0,
-            per_verdict="approve",  # conservative: timeout != positive evidence of issues
+            # conservative: timeout != positive evidence of issues
+            per_verdict="approve",
         )
 
     except Exception as e:
@@ -636,7 +644,8 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     #    Two or more claiming 'critical' triggers HITL escalation."
     #
     # This is intentionally DIFFERENT from the old Rule 2 (critical_findings check).
-    # Old Rule 2 escalated on ANY critical finding — too aggressive, high false positive rate.
+    # Old Rule 2 escalated on ANY critical finding — too aggressive, high false positive
+    # rate.
     # New Safety-Threshold Rule escalates only when 2+ independent agents agree.
     # One miscalibrated agent won't flood the HITL queue.
     #
@@ -982,7 +991,8 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
         # or 422 Unprocessable — bad payload, or 401 — fake/demo repo).
         # Route to HITL, but ALWAYS save to DB so the verdict is retrievable.
         logger.error(
-            "post_review | github_api_error | status=%s error=%s response_body=%s workflow=%s "
+            "post_review | github_api_error | status=%s error=%s response_body=%s "
+            "workflow=%s "
             "— routing to HITL",
             e.status_code,
             str(e),
@@ -1128,7 +1138,8 @@ def _compute_agent_confidence(findings: list[dict[str, Any]]) -> float:
     Computes a single confidence score for an agent's overall output.
 
     Takes the average confidence across all findings.
-    If the agent found nothing: returns 0.9 (high confidence that there's nothing wrong).
+    If the agent found nothing: returns 0.9 (high confidence that there's nothing \
+wrong).
     This is a conservative default — if the agent found nothing, that's a real signal.
     """
     if not findings:
@@ -1431,7 +1442,8 @@ async def _call_agent_real(
       After:  tuple[list[dict], float, str]
               - list[dict]:  finding dicts (as before)
               - float:       agent's confidence score
-              - str:         per_verdict string ("approve"|"request_changes"|"critical_block")
+              - str:         per_verdict string \
+("approve"|"request_changes"|"critical_block")
 
     WHY RETURN A TUPLE INSTEAD OF A DATACLASS?
       _call_agent_real is a private helper called by fan_out_agents only.
@@ -1446,7 +1458,8 @@ async def _call_agent_real(
 
     The AGENTS THEMSELVES return typed AgentFinding objects (clean Pydantic).
     The CONVERSION TO DICTS happens here, at the boundary between agents and the graph.
-    This is the Dependency Inversion boundary: agents know nothing about the graph state.
+    This is the Dependency Inversion boundary: agents know nothing about the graph \
+state.
 
     Returns:
         (finding_dicts, confidence, per_verdict_string)

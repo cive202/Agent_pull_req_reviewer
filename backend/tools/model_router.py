@@ -67,6 +67,7 @@ class ModelConfig:
 
     FIELDS:
     """
+
     # Which LLM provider handles this agent's calls.
     # "openai" -> use llm_client.call_openai()
     # "anthropic" -> use llm_client.call_anthropic()
@@ -97,19 +98,19 @@ class ModelConfig:
 # ---------------------------------------------------------------------------
 
 _ROUTING_TABLE: dict[AgentType, ModelConfig] = {
-
     AgentType.SECURITY: ModelConfig(
         # Security agent: Claude 3.5 Sonnet preferred for deep security reasoning.
         # Falls back to gpt-4o if SECURITY_PROVIDER=openai is set in env.
         provider=os.environ.get("SECURITY_PROVIDER", "anthropic"),
         model_name=os.environ.get(
             "SECURITY_MODEL",
-            "claude-3-5-sonnet-20241022" if os.environ.get("SECURITY_PROVIDER", "anthropic") == "anthropic" else "gpt-4o",
+            "claude-3-5-sonnet-20241022"
+            if os.environ.get("SECURITY_PROVIDER", "anthropic") == "anthropic"
+            else "gpt-4o",
         ),
         context_budget_tokens=8000,
         max_response_tokens=2048,
     ),
-
     AgentType.QUALITY: ModelConfig(
         provider="openai",
         # Default: gpt-4o-mini (fast, cheap, good at pattern matching)
@@ -121,7 +122,6 @@ _ROUTING_TABLE: dict[AgentType, ModelConfig] = {
         context_budget_tokens=6000,  # Needs function-level context
         max_response_tokens=2048,
     ),
-
     AgentType.TEST: ModelConfig(
         provider="openai",
         model_name=os.environ.get(
@@ -131,7 +131,6 @@ _ROUTING_TABLE: dict[AgentType, ModelConfig] = {
         context_budget_tokens=5000,  # Needs to see what was added
         max_response_tokens=2048,
     ),
-
     AgentType.DOCS: ModelConfig(
         provider="openai",
         model_name=os.environ.get(
@@ -139,7 +138,7 @@ _ROUTING_TABLE: dict[AgentType, ModelConfig] = {
             "gpt-4o-mini",
         ),
         context_budget_tokens=4000,  # Only needs function signatures
-        max_response_tokens=1024,    # Docs findings are shorter
+        max_response_tokens=1024,  # Docs findings are shorter
     ),
 }
 

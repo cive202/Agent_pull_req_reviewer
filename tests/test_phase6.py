@@ -29,6 +29,7 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import sys
 import uuid
 
@@ -56,7 +57,11 @@ async def main() -> None:
     try:
         from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-        from backend.database.models import Base, FindingRecord, PRReviewRecord
+        from backend.database.models import Base
+
+        # Import check: both ORM models must exist.
+        models = importlib.import_module("backend.database.models")
+        models.FindingRecord, models.PRReviewRecord
 
         # Use SQLite in-memory with aiosqlite for zero-infrastructure testing.
         # (Storage-Engines.md: "unit smoke tests use in-memory DB for speed.")

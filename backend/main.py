@@ -243,7 +243,8 @@ app.include_router(
 )  # Phase 16: GET /api/v1/economics/{summary,budget,timeseries,workflow/...}
 
 # TODO: add as phases progress
-# app.include_router(auth_router)         # POST /api/v1/auth/login, GET /api/v1/auth/me (Phase 11)
+# app.include_router(auth_router)         # POST /api/v1/auth/login, GET /api/v1/auth/me
+# (Phase 11)
 
 
 # -------------------------------------------------------------------------

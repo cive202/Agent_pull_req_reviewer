@@ -21,6 +21,7 @@
 #
 # NO external services needed (no LLM calls, no Redis, no Postgres, no Qdrant).
 
+import importlib
 import logging
 from pathlib import Path
 from unittest.mock import patch
@@ -29,7 +30,10 @@ import pytest
 
 from backend.core.exceptions import PromptNotFoundError
 from backend.models.enums import AgentType
-from backend.prompts.registry import PromptRegistry, registry
+from backend.prompts.registry import PromptRegistry
+
+# Import check: the module-level registry singleton must exist.
+importlib.import_module("backend.prompts.registry").registry
 
 
 # ---------------------------------------------------------------------------

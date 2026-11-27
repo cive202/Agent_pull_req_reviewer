@@ -90,7 +90,10 @@ class PRReviewRecord(Base):
         String(128),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Primary key — workflow_id format: owner/repo:pr_number:commit_sha (up to 128 chars).",
+        comment=(
+            "Primary key — workflow_id format: owner/repo:pr_number:commit_sha (up to "
+            "128 chars)."
+        ),
     )
 
     # The "owner/repo" string. e.g. "acme-corp/payment-service"
@@ -143,7 +146,9 @@ class PRReviewRecord(Base):
     verdict: Mapped[str] = mapped_column(
         String(32),
         nullable=True,
-        comment="Final review verdict (approve / request_changes / needs_human_review).",
+        comment=(
+            "Final review verdict (approve / request_changes / needs_human_review)."
+        ),
     )
 
     # The review status at completion.
@@ -194,7 +199,10 @@ class PRReviewRecord(Base):
         BigInteger,
         nullable=True,
         default=None,
-        comment="GitHub review ID from the API response. NULL if routed to HITL or not yet posted.",
+        comment=(
+            "GitHub review ID from the API response. NULL if routed to HITL or not yet "
+            "posted."
+        ),
     )
 
     # Timestamp this record was created.
@@ -229,7 +237,8 @@ class PRReviewRecord(Base):
         back_populates="review",
         lazy="selectin",
         cascade="all, delete-orphan",
-        # Note: comment= is not a valid kwarg for relationship(); see column comments above.
+        # Note: comment= is not a valid kwarg for relationship(); see column comments
+        # above.
     )
 
     def __repr__(self) -> str:
@@ -288,7 +297,9 @@ class FindingRecord(Base):
     repo_full_name: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
-        comment="Denormalized repo name for efficient per-repo queries (no JOIN needed).",
+        comment=(
+            "Denormalized repo name for efficient per-repo queries (no JOIN needed)."
+        ),
     )
 
     # Which agent produced this finding.
@@ -312,7 +323,9 @@ class FindingRecord(Base):
     category: Mapped[str] = mapped_column(
         String(32),
         nullable=False,
-        comment="Category of the issue: security / quality / test_coverage / documentation.",
+        comment=(
+            "Category of the issue: security / quality / test_coverage / documentation."
+        ),
     )
 
     # One-sentence description of the issue.
@@ -395,7 +408,8 @@ class FindingRecord(Base):
             "ix_finding_repo_severity",
             "repo_full_name",
             "severity",
-            # comment= is not valid for Index(); intent documented in the block comment above.
+            # comment= is not valid for Index(); intent documented in the block comment
+            # above.
         ),
     )
 
@@ -471,7 +485,9 @@ class RepoFileIndexRecord(Base):
     file_sha: Mapped[str] = mapped_column(
         String(64),
         nullable=False,
-        comment="GitHub blob SHA of the embedded file version. Compare to detect staleness.",
+        comment=(
+            "GitHub blob SHA of the embedded file version. Compare to detect staleness."
+        ),
     )
 
     # When this file was last embedded. UTC-aware.
@@ -491,7 +507,10 @@ class RepoFileIndexRecord(Base):
         Integer,
         nullable=False,
         default=1,
-        comment="Number of vector chunks generated from this file (currently 1, file-as-unit).",
+        comment=(
+            "Number of vector chunks generated from this file (currently 1, "
+            "file-as-unit)."
+        ),
     )
 
     def __repr__(self) -> str:
@@ -565,7 +584,8 @@ class HITLReview(Base):
     )
 
     # Denormalized for fast per-repo queue queries (avoids JOIN to pr_review_records).
-    # (Polyglot-Persistence.md: "Denormalize hot query paths when join cost exceeds storage.")
+    # (Polyglot-Persistence.md: "Denormalize hot query paths when join cost exceeds
+    # storage.")
     repo_full_name: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
@@ -603,7 +623,9 @@ class HITLReview(Base):
         Text,
         nullable=False,
         default="",
-        comment="Human reviewer's explanation for their decision. Required on override.",
+        comment=(
+            "Human reviewer's explanation for their decision. Required on override."
+        ),
     )
 
     # Who reviewed this item. Stored as a string (email, GitHub handle, etc.)
@@ -624,7 +646,9 @@ class HITLReview(Base):
         nullable=False,
         default="pending",
         index=True,
-        comment="HITL lifecycle: pending / in_review / approved / rejected / dismissed.",
+        comment=(
+            "HITL lifecycle: pending / in_review / approved / rejected / dismissed."
+        ),
     )
 
     # WHY the automated system escalated this review.
@@ -643,7 +667,10 @@ class HITLReview(Base):
         Text,
         nullable=False,
         default="",
-        comment="JSON-serialized findings at escalation time. Self-contained for reviewer UI.",
+        comment=(
+            "JSON-serialized findings at escalation time. Self-contained for reviewer "
+            "UI."
+        ),
     )
 
     # Overall confidence score from the automated agents (0.0 to 1.0).
@@ -655,7 +682,8 @@ class HITLReview(Base):
     )
 
     # Whether the human's decision has been posted back to GitHub.
-    # After human approves/rejects, the dispute handler posts to GitHub and sets this True.
+    # After human approves/rejects, the dispute handler posts to GitHub and sets this
+    # True.
     posted_to_github: Mapped[bool] = mapped_column(
         Integer,  # SQLite-compatible boolean as INTEGER
         nullable=False,
@@ -790,7 +818,10 @@ class HITLFeedback(Base):
         Text,
         nullable=False,
         default="",
-        comment="PR diff/context snapshot at decision time, for offline dataset construction.",
+        comment=(
+            "PR diff/context snapshot at decision time, for offline dataset "
+            "construction."
+        ),
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -853,7 +884,9 @@ class LLMCallLog(Base):
         String(255),
         nullable=True,
         index=True,
-        comment="Workflow id this call belonged to. NULL for system/non-workflow calls.",
+        comment=(
+            "Workflow id this call belonged to. NULL for system/non-workflow calls."
+        ),
     )
 
     # Which specialist agent made the call. e.g. "security", "quality",
@@ -899,7 +932,10 @@ class LLMCallLog(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
         index=True,
-        comment="UTC timestamp when the LLM call completed. Indexed for time-window queries.",
+        comment=(
+            "UTC timestamp when the LLM call completed. Indexed for time-window "
+            "queries."
+        ),
     )
 
     __table_args__ = (

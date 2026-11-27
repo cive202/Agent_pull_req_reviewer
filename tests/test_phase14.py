@@ -25,12 +25,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
+from backend.data.ingestion import filter_code_files
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from backend.data.freshness import get_stale_files, mark_files_embedded
+from backend.database.postgres import Base
+
 # ---------------------------------------------------------------------------
 # Test 1: filter_code_files
 #
 # The most basic unit — pure function, no I/O.
 # ---------------------------------------------------------------------------
-from backend.data.ingestion import filter_code_files
 
 
 def test_filter_code_files_keeps_source_code():
@@ -85,10 +89,6 @@ def test_filter_code_files_drops_large_files():
 #
 # Uses an in-memory SQLite database so we don't need Postgres running.
 # ---------------------------------------------------------------------------
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-from backend.data.freshness import get_stale_files, mark_files_embedded
-from backend.database.postgres import Base
 
 
 @pytest_asyncio.fixture

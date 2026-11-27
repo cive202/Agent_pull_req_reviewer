@@ -120,7 +120,7 @@ jobs:
         run: uv pip install --system -e ".[dev]"
 
       - name: Run smoke tests
-        run: python3 -m pytest tests/smoke_phase14.py -v --tb=short
+        run: python3 -m pytest tests/test_phase14.py -v --tb=short
 
   # ---------------------------------------------------------------------------
   # JOB 3: Eval gate (real OpenAI calls)

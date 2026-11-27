@@ -26,7 +26,8 @@
 # Qdrant has no native time-aware scoring. We would need a custom payload filter.
 # DiskANN + plain SQL: score * exp(-hours_since_update / 168.0)
 # 168 hours = 1 week half-life. A file updated today scores 1.0. A week-old file 0.5.
-# Incentivizes retrieving recently modified code — directly relevant to the PR under review.
+# Incentivizes retrieving recently modified code — directly relevant to the PR under
+# review.
 #
 # HYBRID RETRIEVAL (semantic + keyword):
 # Postgres has native tsvector full-text search.
@@ -160,7 +161,8 @@ class TigerMemoryClient:
         cfg = get_settings()
         # Resolve DSN: explicit arg > TIGER_DATABASE_URL env > DATABASE_URL fallback
         resolved_dsn = dsn or cfg.tiger_database_url or cfg.database_url
-        # asyncpg DSN format: postgres:// or postgresql+asyncpg:// -> strip driver prefix
+        # asyncpg DSN format: postgres:// or postgresql+asyncpg:// -> strip driver
+        # prefix
         resolved_dsn = resolved_dsn.replace("postgresql+asyncpg://", "postgresql://")
 
         async def _init_conn(conn: asyncpg.Connection) -> None:
@@ -211,7 +213,8 @@ class TigerMemoryClient:
 
         sql = """
             INSERT INTO code_chunks
-                (id, repo, path, symbol, chunk_index, content, embedding, token_count, updated_at)
+                (id, repo, path, symbol, chunk_index, content, embedding, token_count, \
+updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             ON CONFLICT (repo, path, chunk_index)
             DO UPDATE SET
@@ -270,12 +273,15 @@ class TigerMemoryClient:
         Retrieve the most relevant code chunks for a query.
 
         Args:
-            query_embedding: Dense vector from the same embedding model as stored chunks.
+            query_embedding: Dense vector from the same embedding model as stored \
+chunks.
             repo:            Filter to a specific repository (owner/repo).
             top_k:           Number of results to return.
             hybrid:          If True, blend semantic + keyword search via RRF.
-            query_text:      Raw query string for keyword search arm (required when hybrid=True).
-            freshness_decay: If True, multiply scores by freshness factor (exp(-age/168h)).
+            query_text:      Raw query string for keyword search arm (required when \
+hybrid=True).
+            freshness_decay: If True, multiply scores by freshness factor \
+(exp(-age/168h)).
 
         Returns:
             List of CodeChunk, ordered by combined relevance score (best first).
@@ -369,7 +375,8 @@ class TigerMemoryClient:
             SELECT
                 id,
                 ROW_NUMBER() OVER (
-                    ORDER BY ts_rank_cd(content_tsv, plainto_tsquery('english', $2)) DESC
+                    ORDER BY ts_rank_cd(content_tsv, plainto_tsquery('english', $2)) \
+DESC
                 ) AS rank_k
             FROM code_chunks
             WHERE repo = $3
@@ -551,6 +558,7 @@ def get_tiger_memory() -> TigerMemoryClient:
     if tiger_memory is None:
         raise RuntimeError(
             "TigerMemoryClient not initialized. "
-            "Call init_tiger_schema() during application startup before using tiger_memory."
+            "Call init_tiger_schema() during application startup before using "
+            "tiger_memory."
         )
     return tiger_memory

@@ -26,6 +26,7 @@
 #   7. resolve_dispute: second call on same id -> DisputeAlreadyResolved raised
 
 import asyncio
+import importlib
 import json
 import logging
 import os
@@ -69,7 +70,8 @@ def fail(name: str, reason: str):
 # aiosqlite lets us run async SQLAlchemy against SQLite.
 # We create all tables fresh before each test that needs DB.
 
-from backend.database.models import Base  # all ORM models
+# Imported at this point (not at the top) to keep the original import order.
+Base = importlib.import_module("backend.database.models").Base  # all ORM models
 
 
 async def make_test_engine():
@@ -317,7 +319,10 @@ async def test_resolve_dispute_approve():
         # Pre-insert a HITLReview row in pending status
         hitl_id = str(uuid.uuid4())
         review_id = str(uuid.uuid4())
-        from backend.database.models import HITLReview, HITLFeedback
+        from backend.database.models import HITLReview
+
+        # Import check: HITLFeedback must exist.
+        importlib.import_module("backend.database.models").HITLFeedback
 
         async with factory() as session:
             async with session.begin():

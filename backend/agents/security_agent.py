@@ -73,7 +73,8 @@ class SecurityAgent(BaseAgent):
         """
         Security-specific instructions for the LLM.
 
-        PRIMARY SOURCE: backend/prompts/templates/security/v1.txt (loaded by PromptRegistry).
+        PRIMARY SOURCE: backend/prompts/templates/security/v1.txt (loaded by \
+PromptRegistry).
         This inline string is the FALLBACK used only when the templates directory is
         missing from the deployment. In normal operation this method is never called.
         (See BaseAgent._get_prompt_with_fallback() for the two-level strategy.)
@@ -89,7 +90,8 @@ class SecurityAgent(BaseAgent):
         """
         return """\
 You are a senior application security engineer reviewing a GitHub pull request.
-Your job is to identify REAL security vulnerabilities — not style issues, not theoretical risks.
+Your job is to identify REAL security vulnerabilities — not style issues, not \
+theoretical risks.
 
 WHAT TO LOOK FOR (OWASP Top 10):
 
@@ -130,7 +132,8 @@ WHAT TO LOOK FOR (OWASP Top 10):
 
 6. CRYPTOGRAPHIC FAILURES:
    - Using MD5 or SHA1 for password hashing (should be bcrypt/argon2/scrypt)
-   - Weak random number generation for security tokens (random.random() vs secrets.token_bytes())
+   - Weak random number generation for security tokens (random.random() vs \
+secrets.token_bytes())
    - ECB mode encryption
 
 7. INSECURE DESERIALIZATION:

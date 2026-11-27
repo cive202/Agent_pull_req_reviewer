@@ -4,7 +4,8 @@
 #
 # WHY THIS EXISTS (wiki: Client-Isolation-Layer):
 #   "Security boundaries are hard to retrofit: Design them in from the beginning."
-#   "Cross-domain tool access is dangerous: Forbid by default. Explicit allowlisting only."
+#   "Cross-domain tool access is dangerous: Forbid by default. Explicit allowlisting
+#   only."
 #   "Monolithic agent with 100+ tools causes wild hallucination and intent confusion."
 #
 #   Each specialist agent has a MINIMUM set of tools it needs. SecurityAgent
@@ -73,7 +74,8 @@ class CapabilityViolationError(Exception):
             f"Agent '{agent_type.value}' attempted to call tool '{tool_name}', "
             f"which is outside its capability scope. "
             f"Allowed tools for this agent: {sorted(allowed)}. "
-            "This is a policy violation — check for prompt injection or misconfiguration."
+            "This is a policy violation — check for prompt injection or "
+            "misconfiguration."
         )
 
 
@@ -124,13 +126,16 @@ CAPABILITY_MAP: dict[AgentType, CapabilityScope] = {
         allowed_tool_names=frozenset(
             {
                 "check_secrets_pattern",  # primary tool: deterministic secret detection
-                "search_similar_findings",  # secondary: detect systemic/repeated vuln patterns
+                # secondary: detect systemic/repeated vuln patterns
+                "search_similar_findings",
                 "get_dependency_advisory",  # secondary: flag new deps with known CVEs
             }
         ),
         rationale=(
-            "SecurityAgent needs secret scanning (deterministic, more reliable than LLM "
-            "for literal patterns), similarity search to detect systemic vulnerabilities "
+            "SecurityAgent needs secret scanning (deterministic, more reliable "
+            "than LLM "
+            "for literal patterns), similarity search to detect systemic "
+            "vulnerabilities "
             "across files, and dependency advisory to flag dangerous new packages. "
             "It does NOT need syntax_check — broken syntax is QualityAgent's domain."
         ),
@@ -140,12 +145,15 @@ CAPABILITY_MAP: dict[AgentType, CapabilityScope] = {
         allowed_tool_names=frozenset(
             {
                 "run_syntax_check",  # primary tool: deterministic broken-code detection
-                "search_similar_findings",  # secondary: compare code quality patterns across repo
+                # secondary: compare code quality patterns across repo
+                "search_similar_findings",
             }
         ),
         rationale=(
-            "QualityAgent focuses on code correctness and style. Syntax checking gives it "
-            "a deterministic gate for obviously broken code before spending LLM tokens on "
+            "QualityAgent focuses on code correctness and style. Syntax checking "
+            "gives it "
+            "a deterministic gate for obviously broken code before spending LLM "
+            "tokens on "
             "analysis. Similarity search helps it flag inconsistencies (same function "
             "implemented differently in two places). "
             "It does NOT need dependency_advisory (security concern) or "
@@ -156,8 +164,10 @@ CAPABILITY_MAP: dict[AgentType, CapabilityScope] = {
         agent_type=AgentType.TEST,
         allowed_tool_names=frozenset(
             {
-                "run_syntax_check",  # primary: test code itself must be syntactically valid
-                "search_similar_findings",  # secondary: find existing tests to avoid duplication
+                # primary: test code itself must be syntactically valid
+                "run_syntax_check",
+                # secondary: find existing tests to avoid duplication
+                "search_similar_findings",
             }
         ),
         rationale=(
@@ -172,7 +182,8 @@ CAPABILITY_MAP: dict[AgentType, CapabilityScope] = {
         agent_type=AgentType.DOCS,
         allowed_tool_names=frozenset(
             {
-                "search_similar_findings",  # only tool: find how similar code is documented
+                # only tool: find how similar code is documented
+                "search_similar_findings",
             }
         ),
         rationale=(

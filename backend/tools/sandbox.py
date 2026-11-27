@@ -224,7 +224,8 @@ class Sandbox:
         if "\x00" in code:
             raise SandboxViolationError(
                 "Code contains null bytes (\\x00). "
-                "Null bytes are not valid in source code and may indicate an injection attempt."
+                "Null bytes are not valid in source code and may indicate an "
+                "injection attempt."
             )
 
     # ------------------------------------------------------------------

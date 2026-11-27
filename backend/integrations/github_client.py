@@ -477,7 +477,10 @@ class GitHubClient:
 
             page += 1
             logger.debug(
-                "github | get_pr_files | paginating | repo=%s pr=%d page=%d files_so_far=%d",
+                (
+                    "github | get_pr_files | paginating | repo=%s pr=%d page=%d "
+                    "files_so_far=%d"
+                ),
                 repo_full_name,
                 pr_number,
                 page,
@@ -580,7 +583,10 @@ class GitHubClient:
                 # WIKI: Timeouts.md — "Well-placed timeouts provide fault isolation."
                 # The timeout fired. This is a transient error — worth retrying.
                 logger.warning(
-                    "github | request_timeout | method=%s path=%s attempt=%d/%d error=%s",
+                    (
+                        "github | request_timeout | method=%s path=%s attempt=%d/%d "
+                        "error=%s"
+                    ),
                     method,
                     path,
                     attempt + 1,
@@ -740,7 +746,10 @@ class GitHubClient:
             if response.status_code == 429:
                 retry_after = int(response.headers.get("Retry-After", "60"))
                 raise GitHubRateLimitError(
-                    f"GitHub rate limit exceeded on diff request. Retry after {retry_after}s.",
+                    (
+                        "GitHub rate limit exceeded on diff request. Retry after "
+                        f"{retry_after}s."
+                    ),
                     retry_after_seconds=retry_after,
                 )
 

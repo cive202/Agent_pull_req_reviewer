@@ -52,9 +52,11 @@ logger = logging.getLogger("smoke_phase19")
 PASS = []
 FAIL = []
 
+
 def ok(name: str):
     PASS.append(name)
     print(f"  PASS  {name}")
+
 
 def fail(name: str, reason: str):
     FAIL.append(name)
@@ -68,6 +70,7 @@ def fail(name: str, reason: str):
 # We create all tables fresh before each test that needs DB.
 
 from backend.database.models import Base  # all ORM models
+
 
 async def make_test_engine():
     engine = create_async_engine(
@@ -87,7 +90,10 @@ async def make_test_session(engine) -> AsyncSession:
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
-def _make_agent_results(critical_count: int = 0, verdict: str = "REQUEST_CHANGES") -> list[dict]:
+
+def _make_agent_results(
+    critical_count: int = 0, verdict: str = "REQUEST_CHANGES"
+) -> list[dict]:
     """Build a minimal agent_results list with the requested number of CRITICAL items."""
     results = []
     severities = ["CRITICAL"] * critical_count
@@ -95,12 +101,14 @@ def _make_agent_results(critical_count: int = 0, verdict: str = "REQUEST_CHANGES
     while len(severities) < 4:
         severities.append("HIGH")
     for i, sev in enumerate(severities):
-        results.append({
-            "agent": f"agent_{i}",
-            "verdict": verdict,
-            "confidence": 0.85,
-            "findings": [{"severity": sev, "summary": f"finding_{i}"}],
-        })
+        results.append(
+            {
+                "agent": f"agent_{i}",
+                "verdict": verdict,
+                "confidence": 0.85,
+                "findings": [{"severity": sev, "summary": f"finding_{i}"}],
+            }
+        )
     return results
 
 
@@ -120,8 +128,12 @@ def test_escalation_critical_threshold():
             total_agent_count=4,
         )
 
-        assert result.should_escalate is True, f"expected True, got {result.should_escalate}"
-        assert "rule2" in result.rule_triggered, f"expected rule2, got {result.rule_triggered}"
+        assert result.should_escalate is True, (
+            f"expected True, got {result.should_escalate}"
+        )
+        assert "rule2" in result.rule_triggered, (
+            f"expected rule2, got {result.rule_triggered}"
+        )
         ok(name)
     except Exception as e:
         fail(name, str(e))
@@ -138,13 +150,17 @@ def test_escalation_low_confidence():
         result = should_escalate(
             security_agent_failed=False,
             critical_agent_count=0,
-            overall_confidence=0.30,   # below 0.40 threshold
+            overall_confidence=0.30,  # below 0.40 threshold
             successful_agent_count=4,
             total_agent_count=4,
         )
 
-        assert result.should_escalate is True, f"expected True, got {result.should_escalate}"
-        assert "rule3" in result.rule_triggered, f"expected rule3, got {result.rule_triggered}"
+        assert result.should_escalate is True, (
+            f"expected True, got {result.should_escalate}"
+        )
+        assert "rule3" in result.rule_triggered, (
+            f"expected rule3, got {result.rule_triggered}"
+        )
         ok(name)
     except Exception as e:
         fail(name, str(e))
@@ -160,14 +176,18 @@ def test_escalation_no_trigger():
 
         result = should_escalate(
             security_agent_failed=False,
-            critical_agent_count=1,   # only 1 CRITICAL
+            critical_agent_count=1,  # only 1 CRITICAL
             overall_confidence=0.82,
             successful_agent_count=4,
             total_agent_count=4,
         )
 
-        assert result.should_escalate is False, f"expected False, got {result.should_escalate}"
-        assert result.rule_triggered == "none", f"expected 'none', got {result.rule_triggered}"
+        assert result.should_escalate is False, (
+            f"expected False, got {result.should_escalate}"
+        )
+        assert result.rule_triggered == "none", (
+            f"expected 'none', got {result.rule_triggered}"
+        )
         ok(name)
     except Exception as e:
         fail(name, str(e))
@@ -190,9 +210,10 @@ async def test_enqueue_writes_postgres_and_redis():
         # (not get_db()) because it runs in worker context, not request context.
         factory = async_sessionmaker(engine, expire_on_commit=False)
 
-        with patch("backend.hitl.queue.get_session_factory", return_value=factory), \
-             patch("backend.hitl.queue._notify_slack", new_callable=AsyncMock):
-
+        with (
+            patch("backend.hitl.queue.get_session_factory", return_value=factory),
+            patch("backend.hitl.queue._notify_slack", new_callable=AsyncMock),
+        ):
             from backend.hitl.queue import enqueue_hitl_review
 
             hitl_id = await enqueue_hitl_review(
@@ -202,7 +223,9 @@ async def test_enqueue_writes_postgres_and_redis():
                 pr_number=2,
                 agent_verdict="REQUEST_CHANGES",
                 escalation_reason="3 CRITICAL agents",
-                findings_snapshot=[{"severity": "CRITICAL", "summary": "SQL injection"}],
+                findings_snapshot=[
+                    {"severity": "CRITICAL", "summary": "SQL injection"}
+                ],
                 overall_confidence=0.72,
             )
 
@@ -218,6 +241,7 @@ async def test_enqueue_writes_postgres_and_redis():
         # Assert Postgres row exists
         async with factory() as session:
             from backend.database.models import HITLReview
+
             row = await session.get(HITLReview, hitl_id)
             assert row is not None, "HITLReview row not found in DB"
             assert row.status == "pending"
@@ -226,6 +250,7 @@ async def test_enqueue_writes_postgres_and_redis():
         ok(name)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         fail(name, str(e))
 
@@ -244,9 +269,10 @@ async def test_enqueue_redis_failure_graceful():
 
         factory = async_sessionmaker(engine, expire_on_commit=False)
 
-        with patch("backend.hitl.queue.get_session_factory", return_value=factory), \
-             patch("backend.hitl.queue._notify_slack", new_callable=AsyncMock):
-
+        with (
+            patch("backend.hitl.queue.get_session_factory", return_value=factory),
+            patch("backend.hitl.queue._notify_slack", new_callable=AsyncMock),
+        ):
             from backend.hitl.queue import enqueue_hitl_review
 
             # Must NOT raise even though Redis is dead
@@ -266,12 +292,14 @@ async def test_enqueue_redis_failure_graceful():
         # Postgres row must still exist
         async with factory() as session:
             from backend.database.models import HITLReview
+
             row = await session.get(HITLReview, hitl_id)
             assert row is not None, "Postgres row missing after Redis failure"
 
         ok(name)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         fail(name, str(e))
 
@@ -310,9 +338,12 @@ async def test_resolve_dispute_approve():
         mock_github.post_review = AsyncMock(return_value={"id": 9999})
 
         # Mock record_feedback so we don't need its session_factory
-        with patch("backend.hitl.feedback.get_session_factory", return_value=factory), \
-             patch("backend.hitl.dispute.record_feedback", new_callable=AsyncMock) as mock_feedback:
-
+        with (
+            patch("backend.hitl.feedback.get_session_factory", return_value=factory),
+            patch(
+                "backend.hitl.dispute.record_feedback", new_callable=AsyncMock
+            ) as mock_feedback,
+        ):
             mock_feedback.return_value = str(uuid.uuid4())
 
             from backend.hitl.dispute import resolve_dispute, DisputeRequest
@@ -348,13 +379,16 @@ async def test_resolve_dispute_approve():
                         request=req,
                     )
 
-        assert result.new_status == "approved", f"expected 'approved', got {result.new_status}"
+        assert result.new_status == "approved", (
+            f"expected 'approved', got {result.new_status}"
+        )
         assert result.human_verdict == "approve"
         assert result.hitl_review_id == hitl_id
 
         ok(name)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         fail(name, str(e))
 
@@ -386,15 +420,16 @@ async def test_resolve_dispute_double_claim():
                     escalation_reason="3 critical",
                     findings_snapshot=json.dumps([]),
                     overall_confidence=0.70,
-                    status="approved",   # already resolved
+                    status="approved",  # already resolved
                 )
                 session.add(row)
 
         mock_github = AsyncMock()
 
-        with patch("backend.hitl.feedback.get_session_factory", return_value=factory), \
-             patch("backend.hitl.dispute.record_feedback", new_callable=AsyncMock):
-
+        with (
+            patch("backend.hitl.feedback.get_session_factory", return_value=factory),
+            patch("backend.hitl.dispute.record_feedback", new_callable=AsyncMock),
+        ):
             from backend.hitl.dispute import resolve_dispute, DisputeRequest
             import sqlalchemy
 
@@ -421,12 +456,15 @@ async def test_resolve_dispute_double_claim():
                         )
                 except DisputeAlreadyResolved as e:
                     raised = True
-                    assert e.current_status == "approved", f"wrong status: {e.current_status}"
+                    assert e.current_status == "approved", (
+                        f"wrong status: {e.current_status}"
+                    )
 
         assert raised, "Expected DisputeAlreadyResolved but no exception was raised"
         ok(name)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         fail(name, str(e))
 
@@ -434,6 +472,7 @@ async def test_resolve_dispute_double_claim():
 # =============================================================================
 # Runner
 # =============================================================================
+
 
 async def run_async_tests():
     await test_enqueue_writes_postgres_and_redis()

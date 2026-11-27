@@ -58,7 +58,8 @@ async def record_feedback(
         repo_full_name:   Denormalized repo name.
         pr_number:        PR number.
         agent_verdict:    What the agents decided.
-        human_verdict:    What the human decided ("approve" / "request_changes" / "dismiss").
+        human_verdict:    What the human decided ("approve" / "request_changes" / \
+"dismiss").
         reason:           Human's stated reason (empty string if none provided).
         context_snapshot: JSON-serialized findings snapshot from HITLReview row.
 
@@ -107,7 +108,8 @@ async def record_feedback(
         return feedback_id
 
     except Exception as err:
-        # Feedback recording failure must NOT propagate up and block the dispute resolution.
+        # Feedback recording failure must NOT propagate up and block the dispute
+        # resolution.
         # The human's decision is already committed. Feedback is best-effort here.
         # (Stability-Patterns.md: "Failures are inevitable. Contain the damage.")
         #

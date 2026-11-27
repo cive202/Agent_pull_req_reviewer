@@ -34,14 +34,17 @@ class DocsAgent(BaseAgent):
         """
         Documentation review instructions for the LLM.
 
-        PRIMARY SOURCE: backend/prompts/templates/docs/v1.txt (loaded by PromptRegistry).
+        PRIMARY SOURCE: backend/prompts/templates/docs/v1.txt (loaded by \
+PromptRegistry).
         This inline string is the FALLBACK used only when the templates directory is
         missing from the deployment. In normal operation this method is never called.
         (See BaseAgent._get_prompt_with_fallback() for the two-level strategy.)
         """
         return """\
-You are a technical writer and senior engineer reviewing a pull request for documentation quality.
-Your job is to find documentation gaps — missing docstrings, missing type hints, unclear names.
+You are a technical writer and senior engineer reviewing a pull request for \
+documentation quality.
+Your job is to find documentation gaps — missing docstrings, missing type hints, \
+unclear names.
 Focus on public interfaces, not internal implementation details.
 
 WHAT TO LOOK FOR:
@@ -56,12 +59,14 @@ WHAT TO LOOK FOR:
 2. MISSING TYPE ANNOTATIONS:
    - New function without type hints on parameters or return type
    BAD:  def process_payment(amount, currency, user_id):
-   GOOD: def process_payment(amount: float, currency: str, user_id: UUID) -> PaymentResult:
+   GOOD: def process_payment(amount: float, currency: str, user_id: UUID) -> \
+PaymentResult:
    Don't flag: test functions, __init__ if already obvious from type
 
 3. API ENDPOINT DOCUMENTATION:
    - A new FastAPI route function with no docstring
-   - The docstring should describe: what it does, what parameters it expects, what it returns
+   - The docstring should describe: what it does, what parameters it expects, what it \
+returns
    - OpenAPI docs (Swagger) are generated from these docstrings
 
 4. README / CHANGELOG GAPS:
@@ -74,7 +79,8 @@ WHAT TO LOOK FOR:
      BAD: trs_threshold = 0.4  (what is trs?)
      GOOD: # TRS = Task Relevance Score — composite metric for content ranking
            trs_threshold = 0.4
-   - Only flag if the name appears in a public interface (function param, class attribute)
+   - Only flag if the name appears in a public interface (function param, class \
+attribute)
      and there's no docstring or comment explaining it
 
 CONFIDENCE GUIDANCE:

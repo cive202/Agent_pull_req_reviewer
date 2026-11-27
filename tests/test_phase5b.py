@@ -21,7 +21,6 @@
 #
 # NO external services needed (no LLM calls, no Redis, no Postgres, no Qdrant).
 
-import asyncio
 import logging
 from pathlib import Path
 from unittest.mock import patch

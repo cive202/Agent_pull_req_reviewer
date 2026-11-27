@@ -25,6 +25,7 @@
 #   cd ~/Desktop/ai-pr-review-agent
 #   python3 -m pytest tests/smoke_phase7b.py -v
 
+import importlib
 import pytest
 
 from backend.tools.tool_registry import (
@@ -37,10 +38,12 @@ from backend.tools.sandbox import Sandbox, SandboxViolationError
 from backend.tools.capability_scope import (
     CapabilityViolationError,
     check_capability,
-    get_allowed_tools,
     raise_if_not_allowed,
 )
 from backend.models.enums import AgentType
+
+# Import check: get_allowed_tools must exist.
+importlib.import_module("backend.tools.capability_scope").get_allowed_tools
 
 
 # ---------------------------------------------------------------------------

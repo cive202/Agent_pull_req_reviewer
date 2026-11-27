@@ -17,17 +17,22 @@
 # THE ROUTING LOGIC (Phase 5 decision):
 #
 #   SECURITY agent -> claude-3-5-sonnet-20241022 (Anthropic)
-#     WHY: Security analysis requires deep reasoning about subtle vulnerability patterns.
+#     WHY: Security analysis requires deep reasoning about subtle vulnerability
+#          patterns.
 #          Claude Sonnet 3.5 has stronger long-context reasoning than gpt-4o-mini.
-#          Cost: ~$0.003/1k input tokens. Worth it — a missed SQL injection is expensive.
+#          Cost: ~$0.003/1k input tokens. Worth it — a missed SQL injection is
+#          expensive.
 #
 #   QUALITY agent -> gpt-4o-mini (OpenAI)
-#     WHY: Code quality checks (naming, complexity, SOLID violations) are pattern-matching.
-#          gpt-4o-mini is fast and cheap: $0.00015/1k input tokens. ~20x cheaper than Sonnet.
+#     WHY: Code quality checks (naming, complexity, SOLID violations) are
+#          pattern-matching.
+#          gpt-4o-mini is fast and cheap: $0.00015/1k input tokens. ~20x cheaper than
+#          Sonnet.
 #          Acceptable quality loss at 10x lower cost for non-security findings.
 #
 #   TEST agent -> gpt-4o-mini (OpenAI)
-#     WHY: Same reasoning as QUALITY — "does this diff have test coverage?" is structured.
+#     WHY: Same reasoning as QUALITY — "does this diff have test coverage?" is
+#          structured.
 #          No deep reasoning needed. gpt-4o-mini is sufficient.
 #
 #   DOCS agent -> gpt-4o-mini (OpenAI)
@@ -40,7 +45,8 @@
 #   The budget is chosen per agent based on what they actually need to read:
 #     - Security: needs full changed lines (malicious code is subtle) -> 8000 tokens
 #     - Quality:  needs function-level context -> 6000 tokens
-#     - Test:     needs to see what was added, not necessarily full context -> 5000 tokens
+#     - Test:     needs to see what was added, not necessarily full context -> 5000
+#       tokens
 #     - Docs:     just needs function signatures -> 4000 tokens
 #
 # ENV OVERRIDES:
@@ -154,7 +160,8 @@ def get_model_config(agent_type: AgentType) -> ModelConfig:
         agent_type: one of AgentType.SECURITY, .QUALITY, .TEST, .DOCS
 
     Returns:
-        ModelConfig with provider, model_name, context_budget_tokens, max_response_tokens
+        ModelConfig with provider, model_name, context_budget_tokens, \
+max_response_tokens
 
     Raises:
         ValueError if an unknown agent_type is passed.

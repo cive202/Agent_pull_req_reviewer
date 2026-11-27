@@ -106,8 +106,7 @@ class StructuredLogger:
         **tags: Any,
     ) -> dict[str, Any]:
         return self._emit(
-            logging.INFO, event, message,
-            trace_id=trace_id, span_id=span_id, **tags
+            logging.INFO, event, message, trace_id=trace_id, span_id=span_id, **tags
         )
 
     def warning(
@@ -120,8 +119,7 @@ class StructuredLogger:
         **tags: Any,
     ) -> dict[str, Any]:
         return self._emit(
-            logging.WARNING, event, message,
-            trace_id=trace_id, span_id=span_id, **tags
+            logging.WARNING, event, message, trace_id=trace_id, span_id=span_id, **tags
         )
 
     def error(
@@ -147,8 +145,7 @@ class StructuredLogger:
                 "traceback": tb_module.format_exc(),
             }
         return self._emit(
-            logging.ERROR, event, message,
-            trace_id=trace_id, span_id=span_id, **tags
+            logging.ERROR, event, message, trace_id=trace_id, span_id=span_id, **tags
         )
 
     def debug(
@@ -161,8 +158,7 @@ class StructuredLogger:
         **tags: Any,
     ) -> dict[str, Any]:
         return self._emit(
-            logging.DEBUG, event, message,
-            trace_id=trace_id, span_id=span_id, **tags
+            logging.DEBUG, event, message, trace_id=trace_id, span_id=span_id, **tags
         )
 
 

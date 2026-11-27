@@ -46,7 +46,8 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# TIGER: repo_file_index table is now on the Tiger Cloud instance (same connection pool as code_chunks)
+# TIGER: repo_file_index table is now on the Tiger Cloud instance (same connection pool
+#        as code_chunks)
 # get_stale_files
 #
 # Given a repo and a {file_path: blob_sha} map of the repo's CURRENT state,
@@ -180,7 +181,8 @@ async def mark_files_embedded(
 
     # merge() = SELECT + (INSERT or UPDATE) in one operation.
     # expire_on_commit=False is set on the session factory (data-systems-engineering
-    # skill: mandatory for async sessions to prevent MissingGreenlet on attribute access).
+    # skill: mandatory for async sessions to prevent MissingGreenlet on attribute
+    # access).
     record = RepoFileIndexRecord(
         id=record_id,
         repo_full_name=repo_full_name,

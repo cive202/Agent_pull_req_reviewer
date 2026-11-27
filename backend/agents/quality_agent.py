@@ -42,7 +42,8 @@ class QualityAgent(BaseAgent):
         """
         Code quality review instructions for the LLM.
 
-        PRIMARY SOURCE: backend/prompts/templates/quality/v1.txt (loaded by PromptRegistry).
+        PRIMARY SOURCE: backend/prompts/templates/quality/v1.txt (loaded by \
+PromptRegistry).
         This inline string is the FALLBACK used only when the templates directory is
         missing from the deployment. In normal operation this method is never called.
         (See BaseAgent._get_prompt_with_fallback() for the two-level strategy.)

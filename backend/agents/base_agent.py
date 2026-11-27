@@ -15,7 +15,8 @@
 #
 #   2. PROMPT ASSEMBLY:
 #      The LLM prompt has 4 sections (primacy/recency principle from wiki):
-#        [1] MOST IMPORTANT INSTRUCTION: "Return JSON. Nothing else."  <- first = remembered
+#        [1] MOST IMPORTANT INSTRUCTION: "Return JSON. Nothing else."  <- first =
+#            remembered
 #        [2] Agent's specific instructions (e.g., "Look for SQL injection, XSS...")
 #        [3] PR context (title, description, file count, author)
 #        [4] The diff itself  <- last = also remembered (recency effect)
@@ -34,8 +35,10 @@
 #        - Valid JSON list of dicts -> parse each into AgentFindingRaw -> AgentFinding
 #        - Valid JSON dict with "findings" key -> use that list
 #        - Valid JSON but wrong shape -> return empty findings + confidence=0.3 -> HITL
-#        - Invalid JSON -> _try_extract_json() attempted, then empty + confidence=0.3 -> HITL
-#      confidence=0.3 is below our HITL threshold -> human reviews instead of auto-posting.
+#        - Invalid JSON -> _try_extract_json() attempted, then empty + confidence=0.3 ->
+#          HITL
+#      confidence=0.3 is below our HITL threshold -> human reviews instead of
+#      auto-posting.
 #
 #   5. AGENT RESULT ASSEMBLY:
 #      Returns AgentResult (the Phase 4 model) with findings, confidence, token usage.
@@ -149,7 +152,8 @@ class BaseAgent(ABC):
         """
         Args:
             client: the LLM client to use. Default: the module-level singleton.
-                    Pass a custom client in tests to mock LLM calls without hitting the API.
+                    Pass a custom client in tests to mock LLM calls without hitting \
+the API.
         """
         self._client = client or llm_client
 
@@ -277,8 +281,10 @@ class BaseAgent(ABC):
         # Primary source: prompt registry (versioned .txt file from disk).
         # Fallback source: _system_prompt() inline string defined in each subclass.
         # This two-level strategy means:
-        #   - Registry is the canonical source in production (enables versioning, A/B test)
-        #   - _system_prompt() is a safety net: if a deployment is missing the templates/
+        #   - Registry is the canonical source in production (enables versioning, A/B
+        #     test)
+        #   - _system_prompt() is a safety net: if a deployment is missing the
+        #     templates/
         #     directory, the agent still works instead of crashing entirely.
         # (LLMOps-Essentials.md: "Skip any layer and your car becomes a liability.")
         agent_system_instructions = self._get_prompt_with_fallback(agent_name)
@@ -446,7 +452,8 @@ class BaseAgent(ABC):
           We return APPROVE here because we have NO POSITIVE EVIDENCE of issues —
           the agent couldn't check. The aggregator handles the failure separately
           via the successful_agents count threshold (Rule 4 in aggregate_results).
-          We don't want agent failure to be treated the same as "found a CRITICAL issue".
+          We don't want agent failure to be treated the same as "found a CRITICAL \
+issue".
 
         Args:
             findings: the validated findings from this agent's LLM call.
@@ -644,7 +651,8 @@ The JSON must have exactly this structure:
   "findings": [
     {
       "severity": "critical|high|medium|low",
-      "category": "security|quality|test_coverage|documentation|performance|architecture",
+      "category": \
+"security|quality|test_coverage|documentation|performance|architecture",
       "summary": "One sentence describing the issue.",
       "file_path": "path/to/file.py or null",
       "line_start": 42,
@@ -713,7 +721,8 @@ def _build_user_message(
 
     # Peer context block — only included if non-empty (Phase 8 sequential pass)
     # In the parallel fan-out (current Phase 4), this is always empty.
-    # WIKI: WorkTask-Contract.md — "Workers are decoupled; they don't know about each other."
+    # WIKI: WorkTask-Contract.md — "Workers are decoupled; they don't know about each
+    #       other."
     # We expose a SUMMARY only — just enough to avoid duplicate flagging.
     peer_block = ""
     if peer_context:
@@ -757,7 +766,8 @@ def _apply_output_guardrail(
     It handles everything that can go wrong with LLM output.
 
     WHAT CAN GO WRONG:
-      1. The LLM returned valid JSON but with {"issues": [...]} instead of {"findings": [...]}
+      1. The LLM returned valid JSON but with {"issues": [...]} instead of \
+{"findings": [...]}
          -> We try "findings", then "issues", then "results", then any list value
       2. The LLM returned a list directly instead of {"findings": [...]}
          -> We accept it
@@ -848,7 +858,8 @@ def _apply_output_guardrail(
 
     # Compute the overall agent confidence from the individual finding confidences
     if not findings:
-        # Valid JSON, no findings -> conservative confidence (we might have missed something)
+        # Valid JSON, no findings -> conservative confidence (we might have missed
+        # something)
         confidence = 0.7
     else:
         # Mean confidence across all findings

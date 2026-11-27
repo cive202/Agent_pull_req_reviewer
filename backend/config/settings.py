@@ -124,7 +124,8 @@ class Settings(BaseSettings):
         description=(
             "Tiger Cloud connection URL. "
             "Format: postgres://tsdbadmin:<password>@<host>:5432/tsdb?sslmode=require. "
-            "Falls back to DATABASE_URL when empty (local dev with timescaledb-ha Docker)."
+            "Falls back to DATABASE_URL when empty (local dev with timescaledb-ha "
+            "Docker)."
         ),
     )
 
@@ -213,11 +214,15 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------------------
     daily_budget_usd: float = Field(
         default=50.0,
-        description="Hard daily LLM spend cap in USD. Agents short-circuit when exceeded.",
+        description=(
+            "Hard daily LLM spend cap in USD. Agents short-circuit when exceeded."
+        ),
     )
     per_review_budget_usd: float = Field(
         default=0.50,
-        description="Advisory per-review spend cap in USD. Surfaced as a metric, not enforced.",
+        description=(
+            "Advisory per-review spend cap in USD. Surfaced as a metric, not enforced."
+        ),
     )
 
     # -------------------------------------------------------------------------
@@ -232,7 +237,8 @@ class Settings(BaseSettings):
 
     @property
     def is_production(self) -> bool:
-        """True in production. Disables debug features, enables strict error handling."""
+        """True in production. Disables debug features, enables strict error \
+handling."""
         return self.app_env == "production"
 
 

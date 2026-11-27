@@ -61,11 +61,13 @@ class JudgeScore:
                             (0.0 = none found, 1.0 = all found)
         severity_accuracy -- fraction of expected findings whose severity met
                              the minimum (only checked when finding was found)
-        overall_score    -- weighted composite: 0.4*verdict + 0.4*coverage + 0.2*severity
+        overall_score    -- weighted composite: 0.4*verdict + 0.4*coverage + \
+0.2*severity
                             Range: 0.0 to 1.0
         reasoning        -- LLM judge's explanation (useful for debugging failures)
         judge_used_llm   -- True if LLM was called; False if score was computed
-                            purely deterministically (e.g., verdict mismatch short-circuit)
+                            purely deterministically (e.g., verdict mismatch \
+short-circuit)
     """
 
     example_id: str
@@ -380,7 +382,8 @@ For each expected finding, determine:
 Return a JSON object with exactly these fields:
 {{
   "finding_coverage": <float 0.0-1.0, fraction of expected findings matched>,
-  "severity_accuracy": <float 0.0-1.0, fraction of matched findings with adequate severity>,
+  "severity_accuracy": <float 0.0-1.0, fraction of matched findings with adequate \
+severity>,
   "reasoning": "<one sentence explaining the scores>"
 }}
 

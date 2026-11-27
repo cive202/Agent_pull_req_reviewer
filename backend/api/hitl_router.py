@@ -66,7 +66,9 @@ class HITLDecisionRequest(BaseModel):
     )
     reason: str = Field(
         default="",
-        description="Reviewer's explanation. Required when verdict is 'request_changes'.",
+        description=(
+            "Reviewer's explanation. Required when verdict is 'request_changes'."
+        ),
     )
     reviewer_id: str = Field(
         ...,

@@ -1,4 +1,4 @@
-# Agent_pull_req_reviewer
+# ai-agent-pull-req-reviewer
 
 # AI PR Review Agent
 

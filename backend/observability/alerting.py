@@ -182,20 +182,27 @@ def _build_default_rules() -> list[AlertRule]:
         AlertRule(
             name="token_inflation",
             level=AlertLevel.WARNING,
-            description="Token usage 30% above baseline -- prompt regression or context bloat",
+            description=(
+                "Token usage 30% above baseline -- prompt regression or context bloat"
+            ),
             # Wiki: "WARNING on token_inflation > 130% of baseline"
             condition=lambda m: m.token_inflation > 1.30,
         ),
         AlertRule(
             name="high_hitl_rate",
             level=AlertLevel.WARNING,
-            description=">30% of reviews escalated to HITL -- Safety-Threshold Rule may be mis-tuned",
+            description=(
+                ">30% of reviews escalated to HITL -- Safety-Threshold Rule may be "
+                "mis-tuned"
+            ),
             condition=lambda m: m.hitl_rate > 0.30,
         ),
         AlertRule(
             name="cost_drift",
             level=AlertLevel.INFO,
-            description="Average cost > $0.10/review -- budget drift, check model routing",
+            description=(
+                "Average cost > $0.10/review -- budget drift, check model routing"
+            ),
             # Wiki: "INFO on cache_hit_rate < 20%" -- analogous cost-tracking signal
             condition=lambda m: m.avg_cost_per_review > 0.10,
         ),

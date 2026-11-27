@@ -43,14 +43,16 @@ from fastapi.responses import JSONResponse
 from backend.config.settings import get_settings
 from backend.database.postgres import init_db
 from backend.memory.context_retriever import retrieve_context_for_diff  # noqa: F401 (used in routes)
-from backend.database.postgres import init_tiger_schema  # TIGER: replaces ensure_collection
+from backend.database.postgres import (
+    init_tiger_schema,
+)  # TIGER: replaces ensure_collection
 from backend.memory.redis_client import redis_client
 from backend.webhook_receiver.router import router as webhook_router
 
 # Phase 3 REST API routers
 from backend.api.reviews import router as reviews_router
 from backend.api.queue import router as queue_router
-from backend.api.hitl_router import hitl_router       # Phase 19: HITL queue + dispute
+from backend.api.hitl_router import hitl_router  # Phase 19: HITL queue + dispute
 from backend.api.economics_router import economics_router  # Phase 16: cost & budget
 
 # Phase 12 circuit breaker registry — surfaced in /health
@@ -141,7 +143,9 @@ async def lifespan(app: FastAPI):
         await init_db()
         logger.info("Postgres tables verified/created.")
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Postgres unavailable at startup — will retry on first request: %s", exc)
+        logger.warning(
+            "Postgres unavailable at startup — will retry on first request: %s", exc
+        )
 
     # -------------------------------------------------------------------------
     # Tiger Cloud — init connection pool + run schema migration
@@ -160,7 +164,8 @@ async def lifespan(app: FastAPI):
         logger.info("Tiger Cloud ready — memory + events spine online.")
     except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "Tiger Cloud unavailable at startup — RAG context and events disabled: %s", exc
+            "Tiger Cloud unavailable at startup — RAG context and events disabled: %s",
+            exc,
         )
 
     yield  # <-- server is running, accepting requests
@@ -225,13 +230,17 @@ else:
 # Add routers here as modules are built.
 # -------------------------------------------------------------------------
 
-app.include_router(webhook_router)        # POST /webhook/github
+app.include_router(webhook_router)  # POST /webhook/github
 
 # Phase 3 REST API routers
-app.include_router(reviews_router)        # GET /api/v1/reviews, GET /api/v1/reviews/{id}
-app.include_router(queue_router)          # GET /api/v1/queue
-app.include_router(hitl_router)           # Phase 19: GET /api/v1/hitl/queue, POST /api/v1/hitl/{id}/decision
-app.include_router(economics_router)      # Phase 16: GET /api/v1/economics/{summary,budget,timeseries,workflow/...}
+app.include_router(reviews_router)  # GET /api/v1/reviews, GET /api/v1/reviews/{id}
+app.include_router(queue_router)  # GET /api/v1/queue
+app.include_router(
+    hitl_router
+)  # Phase 19: GET /api/v1/hitl/queue, POST /api/v1/hitl/{id}/decision
+app.include_router(
+    economics_router
+)  # Phase 16: GET /api/v1/economics/{summary,budget,timeseries,workflow/...}
 
 # TODO: add as phases progress
 # app.include_router(auth_router)         # POST /api/v1/auth/login, GET /api/v1/auth/me (Phase 11)
@@ -256,6 +265,7 @@ app.include_router(economics_router)      # Phase 16: GET /api/v1/economics/{sum
 # a pod that can actually process it.
 # -------------------------------------------------------------------------
 
+
 @app.get(
     "/health/live",
     tags=["ops"],
@@ -276,6 +286,7 @@ async def _check_postgres() -> str:
         from backend.database.postgres import get_engine
         from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
         from sqlalchemy import text
+
         factory = async_sessionmaker(
             bind=get_engine(),
             class_=AsyncSession,
@@ -304,6 +315,7 @@ async def _check_tiger() -> str:
     """
     try:
         from backend.memory.tiger_client import get_tiger_memory
+
         client = get_tiger_memory()
         result = await client.health_check()
         if result.get("status") == "ok":
@@ -351,10 +363,7 @@ async def health_check() -> JSONResponse:
 
     # "degraded" if any hard dependency (Postgres, Redis) is unhealthy.
     # Qdrant failure is soft — reviews still run, just without RAG context.
-    hard_ok = (
-        postgres_status == "ok"
-        and redis_status == "ok"
-    )
+    hard_ok = postgres_status == "ok" and redis_status == "ok"
     overall = "ok" if hard_ok else "degraded"
 
     body: dict[str, Any] = {

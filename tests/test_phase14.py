@@ -194,7 +194,7 @@ async def test_mark_files_embedded_upsert(db_session):
 # ---------------------------------------------------------------------------
 # Test 4 & 5: ingest_repository — full pipeline with mocks
 #
-# Mocks: httpx (GitHub API), embed_text, upsert_code_chunks, get_session_factory
+# Mocks: httpx (GitHub API), embed_text, get_tiger_memory, get_session_factory
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_ingest_repository_embeds_stale_files():
@@ -241,6 +241,9 @@ async def test_ingest_repository_embeds_stale_files():
         mock_resp.raise_for_status = MagicMock()
         get_responses.append(mock_resp)
 
+    mock_tiger = MagicMock()
+    mock_tiger.upsert_chunks = AsyncMock()
+
     mock_http_client = AsyncMock()
     mock_http_client.get = AsyncMock(side_effect=get_responses)
     mock_http_client.__aenter__ = AsyncMock(return_value=mock_http_client)
@@ -269,9 +272,7 @@ async def test_ingest_repository_embeds_stale_files():
             new_callable=AsyncMock,
             return_value=fake_vector,
         ),
-        patch(
-            "backend.data.ingestion.upsert_code_chunks", new_callable=AsyncMock
-        ) as mock_upsert,
+        patch("backend.data.ingestion.get_tiger_memory", return_value=mock_tiger),
         patch(
             "backend.data.ingestion.get_stale_files",
             new_callable=AsyncMock,
@@ -289,7 +290,7 @@ async def test_ingest_repository_embeds_stale_files():
     assert summary["embedded"] == 2
     assert summary["stale_files"] == 2
     assert summary["errors"] == 0
-    assert mock_upsert.call_count == 2
+    assert mock_tiger.upsert_chunks.await_count == 2
 
 
 @pytest.mark.asyncio
@@ -314,6 +315,9 @@ async def test_ingest_repository_skips_fresh_files():
         mock_resp.raise_for_status = MagicMock()
         get_responses.append(mock_resp)
 
+    mock_tiger = MagicMock()
+    mock_tiger.upsert_chunks = AsyncMock()
+
     mock_http_client = AsyncMock()
     mock_http_client.get = AsyncMock(side_effect=get_responses)
     mock_http_client.__aenter__ = AsyncMock(return_value=mock_http_client)
@@ -331,7 +335,7 @@ async def test_ingest_repository_skips_fresh_files():
         patch(
             "backend.data.ingestion.embed_text", new_callable=AsyncMock
         ) as mock_embed,
-        patch("backend.data.ingestion.upsert_code_chunks", new_callable=AsyncMock),
+        patch("backend.data.ingestion.get_tiger_memory", return_value=mock_tiger),
         patch(
             "backend.data.ingestion.get_stale_files",
             new_callable=AsyncMock,
@@ -357,6 +361,9 @@ async def test_ingest_repository_isolates_per_file_errors():
     A single file failing to embed does not abort the rest of the pipeline.
     (fault isolation — Distributed-Systems-Fault-Model.md wiki)
     """
+    mock_tiger = MagicMock()
+    mock_tiger.upsert_chunks = AsyncMock()
+
     mock_http_client = AsyncMock()
     mock_http_client.__aenter__ = AsyncMock(return_value=mock_http_client)
     mock_http_client.__aexit__ = AsyncMock(return_value=False)
@@ -405,9 +412,7 @@ async def test_ingest_repository_isolates_per_file_errors():
             new_callable=AsyncMock,
             side_effect=embed_calls,
         ),
-        patch(
-            "backend.data.ingestion.upsert_code_chunks", new_callable=AsyncMock
-        ) as mock_upsert,
+        patch("backend.data.ingestion.get_tiger_memory", return_value=mock_tiger),
         patch(
             "backend.data.ingestion.get_stale_files",
             new_callable=AsyncMock,
@@ -424,7 +429,7 @@ async def test_ingest_repository_isolates_per_file_errors():
     # a.py errored, b.py succeeded — pipeline continued past the error
     assert summary["errors"] == 1
     assert summary["embedded"] == 1
-    assert mock_upsert.call_count == 1  # only b.py was upserted
+    assert mock_tiger.upsert_chunks.await_count == 1  # only b.py was upserted
 
 
 # ---------------------------------------------------------------------------

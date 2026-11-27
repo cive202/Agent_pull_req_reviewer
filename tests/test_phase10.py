@@ -54,7 +54,8 @@ def test_review_event_covers_lifecycle():
 def test_review_event_dot_naming_convention():
     """All events use dot-separated lowercase format (e.g. 'llm.called')."""
     for event in ReviewEvent:
-        val = event.value  # use .value explicitly -- StrEnum shim on 3.10 makes str() include class name
+        # use .value explicitly -- StrEnum shim on 3.10 makes str() include class name
+        val = event.value
         assert "." in val, f"Event {event!r} missing dot separator"
         assert val == val.lower(), f"Event {event!r} value {val!r} not lowercase"
 

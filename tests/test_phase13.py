@@ -36,6 +36,7 @@ os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-test")
 # Clear lru_cache so Settings picks up the env vars we just set
 # (cache may already be populated if another test file ran first).
 from backend.config.settings import get_settings
+
 get_settings.cache_clear()
 
 # Import backend.main NOW (env vars are set, cache cleared above).
@@ -50,6 +51,7 @@ from fastapi.testclient import TestClient
 # ===========================================================================
 # GROUP A — /health endpoints
 # ===========================================================================
+
 
 class TestHealthEndpoints:
     """
@@ -73,19 +75,24 @@ class TestHealthEndpoints:
           names in backend.main's namespace.
         """
         from unittest.mock import patch as _patch, AsyncMock as _AM
+
         breakers = breakers or []
         return [
             # Lifespan: redis_client is an instance; patch its methods directly.
-            _patch.object(_main_module.redis_client, "connect",    new=_AM()),
+            _patch.object(_main_module.redis_client, "connect", new=_AM()),
             _patch.object(_main_module.redis_client, "disconnect", new=_AM()),
             # Lifespan: init_db and ensure_collection are imported names in main.
-            _patch.object(_main_module, "init_db",          new=_AM()),
-            _patch.object(_main_module, "ensure_collection", new=_AM(return_value=True)),
+            _patch.object(_main_module, "init_db", new=_AM()),
+            _patch.object(
+                _main_module, "ensure_collection", new=_AM(return_value=True)
+            ),
             # /health endpoint: the three check coroutines and circuit breaker list.
-            _patch.object(_main_module, "_check_postgres",        new=_AM(return_value=pg)),
-            _patch.object(_main_module, "_check_redis",           new=_AM(return_value=redis)),
-            _patch.object(_main_module, "_check_qdrant",          new=_AM(return_value=qdrant)),
-            _patch.object(_main_module, "list_breaker_summaries", return_value=breakers),
+            _patch.object(_main_module, "_check_postgres", new=_AM(return_value=pg)),
+            _patch.object(_main_module, "_check_redis", new=_AM(return_value=redis)),
+            _patch.object(_main_module, "_check_qdrant", new=_AM(return_value=qdrant)),
+            _patch.object(
+                _main_module, "list_breaker_summaries", return_value=breakers
+            ),
         ]
 
     @pytest.fixture
@@ -96,6 +103,7 @@ class TestHealthEndpoints:
         """
         from contextlib import ExitStack
         from fastapi.testclient import TestClient
+
         with ExitStack() as stack:
             for p in self._all_mocks():
                 stack.enter_context(p)
@@ -148,6 +156,7 @@ class TestHealthEndpoints:
         Postgres is a hard dependency — its failure degrades the service.
         """
         from contextlib import ExitStack
+
         with ExitStack() as stack:
             for p in self._all_mocks(pg="error: connection refused"):
                 stack.enter_context(p)
@@ -162,6 +171,7 @@ class TestHealthEndpoints:
         Its failure must yield 503 + status='degraded'.
         """
         from contextlib import ExitStack
+
         with ExitStack() as stack:
             for p in self._all_mocks(redis="error: timeout"):
                 stack.enter_context(p)
@@ -176,8 +186,11 @@ class TestHealthEndpoints:
         Qdrant failure must NOT degrade the overall status to 503.
         """
         from contextlib import ExitStack
+
         with ExitStack() as stack:
-            for p in self._all_mocks(qdrant="degraded (collection missing — RAG disabled)"):
+            for p in self._all_mocks(
+                qdrant="degraded (collection missing — RAG disabled)"
+            ):
                 stack.enter_context(p)
             with TestClient(_main_module.app, raise_server_exceptions=False) as c:
                 resp = c.get("/health")
@@ -191,9 +204,10 @@ class TestHealthEndpoints:
         """
         fake_breakers = [
             {"name": "security_agent", "state": "CLOSED", "failure_count": 0},
-            {"name": "quality_agent",  "state": "CLOSED", "failure_count": 0},
+            {"name": "quality_agent", "state": "CLOSED", "failure_count": 0},
         ]
         from contextlib import ExitStack
+
         with ExitStack() as stack:
             for p in self._all_mocks(breakers=fake_breakers):
                 stack.enter_context(p)
@@ -206,6 +220,7 @@ class TestHealthEndpoints:
 # GROUP B — Settings
 # ===========================================================================
 
+
 class TestSettings:
     """
     Verify Settings loads cleanly with all required fields.
@@ -215,6 +230,7 @@ class TestSettings:
     def _make_settings(self, **overrides):
         """Helper: build a Settings with valid required fields + any overrides."""
         from backend.config.settings import Settings
+
         defaults = dict(
             github_webhook_secret="test-secret",
             github_token="ghp_test",
@@ -274,6 +290,7 @@ FIXTURE_PATH = os.path.join(
     "fixtures",
     "sample_pr_opened.json",
 )
+
 
 class TestFixture:
     """

@@ -31,7 +31,6 @@ from __future__ import annotations
 import asyncio
 import sys
 import uuid
-from typing import get_type_hints
 
 # ---------------------------------------------------------------------------
 # Setup path so local imports work
@@ -43,7 +42,6 @@ async def main() -> None:
     results: list[tuple[str, bool, str]] = []
 
     def check(name: str, condition: bool, detail: str = "") -> None:
-        status = "PASS" if condition else "FAIL"
         results.append((name, condition, detail))
         icon = "✓" if condition else "✗"
         print(f"  [{icon}] {name}" + (f"  ({detail})" if detail else ""))

@@ -96,6 +96,7 @@ class AgentOutput:
 
     FIELDS:
     """
+
     # Which agent produced this output
     agent_type: AgentType
 
@@ -267,7 +268,9 @@ class BaseAgent(ABC):
         if was_truncated:
             logger.info(
                 "diff_truncated | agent=%s original_chars=%d truncated_chars=%d",
-                agent_name, len(diff), len(truncated_diff),
+                agent_name,
+                len(diff),
+                len(truncated_diff),
             )
 
         # STEP 2: Assemble the full prompt for the LLM.
@@ -306,7 +309,9 @@ class BaseAgent(ABC):
         except BudgetExceededError as bx:
             logger.warning(
                 "agent_skipped_budget_exceeded | agent=%s spent=$%.4f cap=$%.2f",
-                agent_name, bx.current_spend_usd, bx.cap_usd,
+                agent_name,
+                bx.current_spend_usd,
+                bx.cap_usd,
             )
             return AgentOutput(
                 agent_type=self.agent_type,
@@ -333,12 +338,14 @@ class BaseAgent(ABC):
             # Return a safe empty result that triggers HITL.
             logger.error(
                 "agent_llm_call_failed | agent=%s error=%s",
-                agent_name, str(e), exc_info=True,
+                agent_name,
+                str(e),
+                exc_info=True,
             )
             return AgentOutput(
                 agent_type=self.agent_type,
                 findings=[],
-                confidence=0.3,   # Low confidence -> HITL
+                confidence=0.3,  # Low confidence -> HITL
                 tokens_used=0,
                 error_message=f"LLM call failed: {str(e)}",
                 per_verdict=AgentVerdict.APPROVE,  # no positive evidence of issues
@@ -355,8 +362,11 @@ class BaseAgent(ABC):
         logger.info(
             "agent_complete | agent=%s findings=%d confidence=%.2f "
             "input_tokens=%d output_tokens=%d cost=$%.6f",
-            agent_name, len(findings), confidence,
-            response.input_tokens, response.output_tokens,
+            agent_name,
+            len(findings),
+            confidence,
+            response.input_tokens,
+            response.output_tokens,
             response.estimated_cost_usd,
         )
 
@@ -403,7 +413,8 @@ class BaseAgent(ABC):
                 "prompt_registry_miss_falling_back | agent=%s error=%s "
                 "— using inline _system_prompt() fallback. "
                 "Check that backend/prompts/templates/ was deployed correctly.",
-                agent_name, str(e),
+                agent_name,
+                str(e),
             )
             return self._system_prompt()
 
@@ -443,17 +454,11 @@ class BaseAgent(ABC):
         Returns:
             AgentVerdict enum value.
         """
-        has_critical = any(
-            f.severity == FindingSeverity.CRITICAL
-            for f in findings
-        )
+        has_critical = any(f.severity == FindingSeverity.CRITICAL for f in findings)
         if has_critical:
             return AgentVerdict.CRITICAL_BLOCK
 
-        has_high = any(
-            f.severity == FindingSeverity.HIGH
-            for f in findings
-        )
+        has_high = any(f.severity == FindingSeverity.HIGH for f in findings)
         if has_high:
             return AgentVerdict.REQUEST_CHANGES
 
@@ -575,6 +580,7 @@ class BaseAgent(ABC):
 # These are pure functions — no side effects, no class state.
 # Pure functions are easier to test, read, and reason about.
 # ---------------------------------------------------------------------------
+
 
 def _truncate_to_budget(diff: str, budget_tokens: int) -> str:
     """
@@ -799,7 +805,8 @@ def _apply_output_guardrail(
         if raw_list is None:
             logger.warning(
                 "guardrail_no_findings_list | agent=%s content_keys=%s",
-                agent_name, list(content.keys()),
+                agent_name,
+                list(content.keys()),
             )
             return [], 0.3
 
@@ -810,7 +817,8 @@ def _apply_output_guardrail(
     else:
         logger.warning(
             "guardrail_unexpected_content_type | agent=%s type=%s",
-            agent_name, type(content).__name__,
+            agent_name,
+            type(content).__name__,
         )
         return [], 0.3
 
@@ -820,7 +828,9 @@ def _apply_output_guardrail(
         if not isinstance(item, dict):
             logger.debug(
                 "guardrail_skip_non_dict | agent=%s index=%d type=%s",
-                agent_name, i, type(item).__name__,
+                agent_name,
+                i,
+                type(item).__name__,
             )
             continue
         try:
@@ -830,7 +840,9 @@ def _apply_output_guardrail(
         except Exception as e:
             logger.warning(
                 "guardrail_finding_parse_error | agent=%s index=%d error=%s",
-                agent_name, i, str(e),
+                agent_name,
+                i,
+                str(e),
             )
             # Skip this finding — don't fail the whole review for one bad finding
 

@@ -31,7 +31,12 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from backend.models.enums import FindingCategory, FindingSeverity, ReviewStatus, ReviewVerdict
+from backend.models.enums import (
+    FindingCategory,
+    FindingSeverity,
+    ReviewStatus,
+    ReviewVerdict,
+)
 
 
 # -----------------------------------------------------------------------------
@@ -40,6 +45,7 @@ from backend.models.enums import FindingCategory, FindingSeverity, ReviewStatus,
 # Every method on WorkflowEngine returns this.
 # No more dict[str, Any] — the contract is explicit.
 # -----------------------------------------------------------------------------
+
 
 class AgentFindingSummary(BaseModel):
     """
@@ -51,6 +57,7 @@ class AgentFindingSummary(BaseModel):
     severity and category are enough for the orchestrator to make routing decisions
     (e.g. CRITICAL -> ping human immediately).
     """
+
     agent_type: str
     # Which severity bucket this falls in (CRITICAL, HIGH, MEDIUM, LOW)
     severity: FindingSeverity
@@ -119,6 +126,7 @@ class WorkflowResult(BaseModel):
 # -----------------------------------------------------------------------------
 # WorkflowEngine - the abstract interface
 # -----------------------------------------------------------------------------
+
 
 class WorkflowEngine(ABC):
     """

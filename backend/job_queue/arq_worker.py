@@ -301,7 +301,8 @@ async def enqueue_review_job(
             "run_pr_review",  # the worker function name (as string)
             workflow_id,  # positional arg 1
             input_data,  # positional arg 2
-            _job_id=workflow_id,  # ARQ job ID = workflow_id (for deduplication within ARQ)
+            # ARQ job ID = workflow_id (for deduplication within ARQ)
+            _job_id=workflow_id,
         )
         logger.info(
             "job_enqueued | workflow_id=%s arq_job_id=%s",

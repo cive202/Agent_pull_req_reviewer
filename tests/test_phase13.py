@@ -13,8 +13,12 @@ import sys
 import os
 import json
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_ROOT not in sys.path:
+import pytest
+from fastapi.testclient import TestClient
+
+if (
+    REPO_ROOT := os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+) not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
 # ---------------------------------------------------------------------------
@@ -43,9 +47,6 @@ get_settings.cache_clear()
 # All subsequent patch() calls patch the already-loaded module's attributes,
 # which is the correct pattern — no re-import needed per test.
 import backend.main as _main_module  # noqa: E402 (intentional late import)
-
-import pytest
-from fastapi.testclient import TestClient
 
 
 # ===========================================================================

@@ -362,7 +362,8 @@ async def init_tiger_schema() -> None:
     global _tiger_pool
     cfg = get_settings()
     dsn = cfg.tiger_database_url or cfg.database_url
-    # asyncpg wants plain postgresql:// not postgresql+asyncpg:// (that's SQLAlchemy syntax)
+    # asyncpg wants plain postgresql:// not postgresql+asyncpg:// (that's SQLAlchemy
+    # syntax)
     dsn = dsn.replace("postgresql+asyncpg://", "postgresql://").replace(
         "postgres+asyncpg://", "postgresql://"
     )

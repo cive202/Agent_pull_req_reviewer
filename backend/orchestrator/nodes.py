@@ -47,8 +47,17 @@ import time
 from typing import Any
 
 from backend.config import get_settings
-from backend.integrations.github_client import GitHubClient, GitHubAPIError, GitHubNotFoundError, GitHubRateLimitError
-from backend.integrations.github_models import PostReviewPayload, ReviewEvent, ReviewComment
+from backend.integrations.github_client import (
+    GitHubClient,
+    GitHubAPIError,
+    GitHubNotFoundError,
+    GitHubRateLimitError,
+)
+from backend.integrations.github_models import (
+    PostReviewPayload,
+    ReviewEvent,
+    ReviewComment,
+)
 from backend.memory.context_retriever import retrieve_context_for_diff
 from backend.models.enums import FindingSeverity, ReviewStatus, ReviewVerdict
 from backend.orchestrator.state import AgentResultState, PRReviewState
@@ -69,6 +78,7 @@ logger = logging.getLogger(__name__)
 # Raises an exception -> LangGraph marks the workflow as failed.
 # The WorkflowEngine catches this and returns WorkflowResult(status=FAILED).
 # =============================================================================
+
 
 async def build_context(state: PRReviewState) -> dict[str, Any]:
     """
@@ -158,7 +168,9 @@ async def build_context(state: PRReviewState) -> dict[str, Any]:
             logger.warning(
                 "build_context | github_fetch_failed | repo=%s pr=%d error=%s "
                 "| falling back to webhook payload data",
-                repo, pr_number, github_err,
+                repo,
+                pr_number,
+                github_err,
             )
             pr_diff = state.get("pr_diff", "# diff unavailable — GitHub fetch failed")
             pr_files = state.get("pr_files", [])
@@ -166,6 +178,7 @@ async def build_context(state: PRReviewState) -> dict[str, Any]:
             # Build a minimal stub metadata from the state so downstream code
             # that reads metadata.title / .body / .author_login still works.
             from types import SimpleNamespace
+
             metadata = SimpleNamespace(
                 title=state.get("pr_title", f"PR #{pr_number}"),
                 body=state.get("pr_body", ""),
@@ -251,10 +264,10 @@ async def build_context(state: PRReviewState) -> dict[str, Any]:
 # Agents doing LLM calls need time, but we cannot wait forever.
 # These are conservative values — tuned in Phase 16 (cost/economics).
 _AGENT_TIMEOUTS = {
-    "security": 60,   # security agent runs multiple checks, needs more time
-    "quality":  45,
-    "test":     45,
-    "docs":     30,   # docs agent has less to check, fastest
+    "security": 60,  # security agent runs multiple checks, needs more time
+    "quality": 45,
+    "test": 45,
+    "docs": 30,  # docs agent has less to check, fastest
 }
 
 
@@ -305,13 +318,15 @@ async def _run_single_agent(
             error_message="",
             duration_seconds=round(duration, 3),
             findings=findings,
-            confidence=agent_confidence,    # Phase 8: use agent's own confidence, not recomputed
-            per_verdict=per_verdict_str,    # Phase 8: persist per-agent verdict in state
+            confidence=agent_confidence,  # Phase 8: use agent's own confidence, not recomputed
+            per_verdict=per_verdict_str,  # Phase 8: persist per-agent verdict in state
         )
 
     except asyncio.TimeoutError:
         duration = time.monotonic() - start_time
-        error = f"{agent_type} agent timed out after {_AGENT_TIMEOUTS.get(agent_type, 45)}s"
+        error = (
+            f"{agent_type} agent timed out after {_AGENT_TIMEOUTS.get(agent_type, 45)}s"
+        )
         logger.warning(
             "agent_timeout | agent=%s workflow=%s duration=%.2fs",
             agent_type,
@@ -394,14 +409,16 @@ async def fan_out_agents(state: PRReviewState) -> dict[str, Any]:
                 agent_type,
                 str(result),
             )
-            results.append(AgentResultState(
-                agent_type=agent_type,
-                success=False,
-                error_message=f"Unexpected: {str(result)}",
-                duration_seconds=0.0,
-                findings=[],
-                confidence=0.0,
-            ))
+            results.append(
+                AgentResultState(
+                    agent_type=agent_type,
+                    success=False,
+                    error_message=f"Unexpected: {str(result)}",
+                    duration_seconds=0.0,
+                    findings=[],
+                    confidence=0.0,
+                )
+            )
         else:
             results.append(result)
 
@@ -438,6 +455,7 @@ async def fan_out_agents(state: PRReviewState) -> dict[str, Any]:
 #   4. Any HIGH finding -> REQUEST_CHANGES (not APPROVE)
 #   5. Otherwise, if all confidence above threshold -> APPROVE
 # =============================================================================
+
 
 async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     """
@@ -495,14 +513,16 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
         except ValueError:
             per_verdict_enum = AgentVerdict.APPROVE  # safe default for unknown values
 
-        verdict_records.append(VerdictRecord(
-            agent_type=result["agent_type"],
-            succeeded=result["success"],
-            verdict=per_verdict_enum,
-            confidence=result["confidence"],
-            finding_count=len(result.get("findings", [])),
-            error_message=result.get("error_message", ""),
-        ))
+        verdict_records.append(
+            VerdictRecord(
+                agent_type=result["agent_type"],
+                succeeded=result["success"],
+                verdict=per_verdict_enum,
+                confidence=result["confidence"],
+                finding_count=len(result.get("findings", [])),
+                error_message=result.get("error_message", ""),
+            )
+        )
 
     # Serializable form (plain dicts) for state storage
     verdict_breakdown_dicts = [r.to_dict() for r in verdict_records]
@@ -522,10 +542,8 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     partial_review = len(successful_records) < 4
 
     verdicts_from_successful = {r.verdict for r in successful_records}
-    has_approve    = AgentVerdict.APPROVE in verdicts_from_successful
-    has_non_approve = bool(
-        verdicts_from_successful - {AgentVerdict.APPROVE}
-    )
+    has_approve = AgentVerdict.APPROVE in verdicts_from_successful
+    has_non_approve = bool(verdicts_from_successful - {AgentVerdict.APPROVE})
     conflict_detected = has_approve and has_non_approve
 
     logger.info(
@@ -539,7 +557,9 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     # -------------------------------------------------------------------------
     # Helper: builds the HITL return dict with Phase 8 fields always populated
     # -------------------------------------------------------------------------
-    def _hitl_return(reason: str, all_findings: list[dict[str, Any]], overall_confidence: float = 0.0) -> dict[str, Any]:
+    def _hitl_return(
+        reason: str, all_findings: list[dict[str, Any]], overall_confidence: float = 0.0
+    ) -> dict[str, Any]:
         return {
             "verdict": ReviewVerdict.NEEDS_HUMAN_REVIEW,
             "final_findings": all_findings,
@@ -604,7 +624,9 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     # -------------------------------------------------------------------------
     # Step 4: Compute overall confidence (weighted average)
     # -------------------------------------------------------------------------
-    overall_confidence = total_confidence / successful_agents if successful_agents > 0 else 0.0
+    overall_confidence = (
+        total_confidence / successful_agents if successful_agents > 0 else 0.0
+    )
 
     # -------------------------------------------------------------------------
     # Rule 2 (Phase 8): Safety-Threshold Rule for CRITICAL_BLOCK verdicts.
@@ -623,7 +645,8 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     # Only successful agents' CRITICAL_BLOCK verdicts count toward the threshold.
     # -------------------------------------------------------------------------
     critical_block_count = sum(
-        1 for r in verdict_records
+        1
+        for r in verdict_records
         if r.succeeded and r.verdict == AgentVerdict.CRITICAL_BLOCK
     )
     if critical_block_count >= 2:
@@ -637,7 +660,8 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
         #   agents all screaming CRITICAL) escalate to the human review queue.
         #   This is the right balance: safety without silence.
         critical_agents = [
-            r.agent_type for r in verdict_records
+            r.agent_type
+            for r in verdict_records
             if r.succeeded and r.verdict == AgentVerdict.CRITICAL_BLOCK
         ]
         reason = (
@@ -668,7 +692,8 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
     # No HITL — auto-post the review.
     # -------------------------------------------------------------------------
     has_high = any(
-        f.get("severity") in (FindingSeverity.HIGH.value, FindingSeverity.CRITICAL.value)
+        f.get("severity")
+        in (FindingSeverity.HIGH.value, FindingSeverity.CRITICAL.value)
         for f in all_findings
     )
 
@@ -709,6 +734,7 @@ async def aggregate_results(state: PRReviewState) -> dict[str, Any]:
 #   A) needs_human_review=False -> post directly to GitHub
 #   B) needs_human_review=True  -> write to HITL queue, do NOT post to GitHub
 # =============================================================================
+
 
 async def post_review(state: PRReviewState) -> dict[str, Any]:
     """
@@ -769,7 +795,8 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
             )
             logger.info(
                 "post_review | hitl_enqueued | hitl_id=%s workflow=%s",
-                hitl_id, state["workflow_id"],
+                hitl_id,
+                state["workflow_id"],
             )
         except Exception as hitl_err:
             # Non-fatal: HITL enqueue failure should not crash the whole pipeline.
@@ -779,7 +806,8 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
             logger.error(
                 "post_review | hitl_enqueue_failed | workflow=%s error=%s | "
                 "review result not persisted to HITL queue",
-                state["workflow_id"], hitl_err,
+                state["workflow_id"],
+                hitl_err,
             )
 
         return {
@@ -873,6 +901,7 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
             from backend.database.postgres import get_engine
             from backend.database.repository import save_review
             from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
             _factory = async_sessionmaker(
                 bind=get_engine(), class_=AsyncSession, expire_on_commit=False
             )
@@ -894,7 +923,9 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
                     github_review_id=None,
                 )
         except Exception as db_err:
-            logger.error("post_review | rate_limited | postgres_save_failed | %s", db_err)
+            logger.error(
+                "post_review | rate_limited | postgres_save_failed | %s", db_err
+            )
         return {
             "review_posted": False,
             "github_review_id": None,
@@ -915,6 +946,7 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
             from backend.database.postgres import get_engine
             from backend.database.repository import save_review
             from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
             _factory = async_sessionmaker(
                 bind=get_engine(), class_=AsyncSession, expire_on_commit=False
             )
@@ -936,7 +968,9 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
                     github_review_id=None,
                 )
         except Exception as db_err:
-            logger.error("post_review | pr_not_found | postgres_save_failed | %s", db_err)
+            logger.error(
+                "post_review | pr_not_found | postgres_save_failed | %s", db_err
+            )
         return {
             "review_posted": False,
             "github_review_id": None,
@@ -962,6 +996,7 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
             from backend.database.postgres import get_engine
             from backend.database.repository import save_review
             from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
             _factory = async_sessionmaker(
                 bind=get_engine(), class_=AsyncSession, expire_on_commit=False
             )
@@ -983,7 +1018,9 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
                     github_review_id=None,
                 )
         except Exception as db_err:
-            logger.error("post_review | github_api_error | postgres_save_failed | %s", db_err)
+            logger.error(
+                "post_review | github_api_error | postgres_save_failed | %s", db_err
+            )
         return {
             "review_posted": False,
             "github_review_id": None,
@@ -1013,6 +1050,7 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
         from backend.database.postgres import get_engine
         from backend.database.repository import save_review
         from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
         _factory = async_sessionmaker(
             bind=get_engine(), class_=AsyncSession, expire_on_commit=False
         )
@@ -1063,6 +1101,7 @@ async def post_review(state: PRReviewState) -> dict[str, Any]:
 # These are not nodes — they are utility functions used by nodes above.
 # =============================================================================
 
+
 def _sort_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Sorts findings by severity (CRITICAL first, INFO last).
@@ -1103,6 +1142,7 @@ def _compute_agent_confidence(findings: list[dict[str, Any]]) -> float:
 # These three functions build the GitHub review payload from state data.
 # They are pure functions — no I/O, easily unit-tested.
 # =============================================================================
+
 
 def _verdict_to_review_event(verdict: ReviewVerdict | None) -> ReviewEvent:
     """
@@ -1199,11 +1239,13 @@ def _findings_to_review_comments(
         agent = f.get("agent_type", "agent").capitalize()
         body_parts.insert(0, f"**[{severity}]** _{agent} Agent_")
 
-        comments.append(ReviewComment(
-            path=file_path,
-            line=line,
-            body="\n".join(body_parts),
-        ))
+        comments.append(
+            ReviewComment(
+                path=file_path,
+                line=line,
+                body="\n".join(body_parts),
+            )
+        )
 
     return comments
 
@@ -1247,9 +1289,13 @@ def _build_review_summary(
     if verdict == ReviewVerdict.APPROVE:
         verdict_badge = "✅ **APPROVED** — No significant issues found."
     elif verdict == ReviewVerdict.REQUEST_CHANGES:
-        verdict_badge = "🔴 **CHANGES REQUESTED** — Issues found that must be addressed."
+        verdict_badge = (
+            "🔴 **CHANGES REQUESTED** — Issues found that must be addressed."
+        )
     else:
-        verdict_badge = "⚠️ **NEEDS HUMAN REVIEW** — AI confidence too low to auto-approve."
+        verdict_badge = (
+            "⚠️ **NEEDS HUMAN REVIEW** — AI confidence too low to auto-approve."
+        )
 
     # ── Severity counts ───────────────────────────────────────────────────────
     severity_counts: dict[str, int] = {"critical": 0, "high": 0, "medium": 0, "low": 0}
@@ -1267,7 +1313,9 @@ def _build_review_summary(
         severity_line_parts.append(f"🟡 {severity_counts['medium']} Medium")
     if severity_counts["low"]:
         severity_line_parts.append(f"🔵 {severity_counts['low']} Low")
-    severity_summary = " · ".join(severity_line_parts) if severity_line_parts else "No issues found."
+    severity_summary = (
+        " · ".join(severity_line_parts) if severity_line_parts else "No issues found."
+    )
 
     # ── Agent breakdown ────────────────────────────────────────────────────────
     agent_lines = []
@@ -1276,11 +1324,15 @@ def _build_review_summary(
         if r.get("success"):
             n = len(r.get("findings", []))
             conf = r.get("confidence", 0.0)
-            agent_lines.append(f"  - {agent_name}: ✅ {n} finding(s) · confidence {conf:.0%}")
+            agent_lines.append(
+                f"  - {agent_name}: ✅ {n} finding(s) · confidence {conf:.0%}"
+            )
         else:
             err = r.get("error_message", "unknown error")
             agent_lines.append(f"  - {agent_name}: ❌ Failed — {err}")
-    agent_section = "\n".join(agent_lines) if agent_lines else "  - No agent data available."
+    agent_section = (
+        "\n".join(agent_lines) if agent_lines else "  - No agent data available."
+    )
 
     # ── All findings grouped by file ─────────────────────────────────────────
     # WHY grouped by file not by agent:
@@ -1289,6 +1341,7 @@ def _build_review_summary(
     #   lets the developer jump straight to the relevant file for each issue.
     #   Findings without a file_path are listed under "General" at the top.
     from collections import defaultdict
+
     by_file: dict[str, list] = defaultdict(list)
     for f in findings:
         key = f.get("file_path") or "General"
@@ -1296,11 +1349,11 @@ def _build_review_summary(
 
     SEV_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     findings_lines = []
-    sorted_files = sorted(by_file.keys(), key=lambda k: ("" if k == "General" else k))
+    sorted_files = sorted(by_file.keys(), key=lambda k: "" if k == "General" else k)
     for file_key in sorted_files:
         file_findings = sorted(
             by_file[file_key],
-            key=lambda f: SEV_ORDER.get(f.get("severity", "low").lower(), 3)
+            key=lambda f: SEV_ORDER.get(f.get("severity", "low").lower(), 3),
         )
         findings_lines.append(f"\n**`{file_key}`**")
         for f in file_findings:
@@ -1310,8 +1363,12 @@ def _build_review_summary(
             line_str = f" _(line {line})_" if line else ""
             summary = f.get("summary", "")
             suggestion = f.get("suggestion", "")
-            emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🔵"}.get(sev, "⚪")
-            findings_lines.append(f"- {emoji} **[{sev}]** {summary}{line_str} _— {agent}_")
+            emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🔵"}.get(
+                sev, "⚪"
+            )
+            findings_lines.append(
+                f"- {emoji} **[{sev}]** {summary}{line_str} _— {agent}_"
+            )
             if suggestion:
                 findings_lines.append(f"  > 💡 {suggestion}")
 
@@ -1404,9 +1461,9 @@ async def _call_agent_real(
     # Map string agent_type to the class and enum
     _agent_registry = {
         "security": (SecurityAgent, AgentType.SECURITY),
-        "quality":  (QualityAgent, AgentType.QUALITY),
-        "test":     (TestAgent,    AgentType.TEST),
-        "docs":     (DocsAgent,    AgentType.DOCS),
+        "quality": (QualityAgent, AgentType.QUALITY),
+        "test": (TestAgent, AgentType.TEST),
+        "docs": (DocsAgent, AgentType.DOCS),
     }
 
     entry = _agent_registry.get(agent_type)

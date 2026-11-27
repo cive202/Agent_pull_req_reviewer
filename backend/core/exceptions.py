@@ -203,7 +203,8 @@ class MemoryStoreError(PRReviewAgentError):
 class ConfigurationError(PRReviewAgentError):
     """
     Raised when a required environment variable is missing or has an invalid value.
-    This should only happen at startup. If it happens at runtime, something is very wrong.
+    This should only happen at startup. If it happens at runtime, something is very \
+wrong.
     """
 
     pass

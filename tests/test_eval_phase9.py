@@ -218,7 +218,8 @@ class TestPRReviewJudge:
         )
         assert score.verdict_correct is True
         assert score.overall_score >= PASS_THRESHOLD, (
-            f"Perfect-match score {score.overall_score} below threshold {PASS_THRESHOLD}"
+            f"Perfect-match score {score.overall_score} below threshold "
+            f"{PASS_THRESHOLD}"
         )
 
     def test_wrong_verdict_sets_verdict_correct_false(self):

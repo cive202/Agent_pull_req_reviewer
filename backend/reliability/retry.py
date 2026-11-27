@@ -53,6 +53,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 # Configuration
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class RetryConfig:
     """
@@ -68,6 +69,7 @@ class RetryConfig:
         retryable_exceptions -- Only these exception types trigger a retry.
                                 Default: broad (Exception), override to narrow.
     """
+
     max_attempts: int = 3
     base_delay_s: float = 1.0
     max_delay_s: float = 30.0
@@ -101,12 +103,14 @@ DEFAULT_TOOL_RETRY = RetryConfig(
 # Exceptions
 # ---------------------------------------------------------------------------
 
+
 class RetryExhaustedError(Exception):
     """
     Raised when all retry attempts are consumed without success.
 
     Wraps the last exception so callers can inspect the root cause.
     """
+
     def __init__(self, attempts: int, last_exception: Exception) -> None:
         self.attempts = attempts
         self.last_exception = last_exception
@@ -120,6 +124,7 @@ class RetryExhaustedError(Exception):
 # Delay calculation
 # ---------------------------------------------------------------------------
 
+
 def _compute_delay(attempt: int, config: RetryConfig) -> float:
     """
     Compute sleep duration for attempt N (0-indexed).
@@ -127,7 +132,7 @@ def _compute_delay(attempt: int, config: RetryConfig) -> float:
     Formula: min(base * 2^attempt, max_delay) + jitter
     Jitter: uniform(0, delay * jitter_factor)
     """
-    delay = min(config.base_delay_s * (2 ** attempt), config.max_delay_s)
+    delay = min(config.base_delay_s * (2**attempt), config.max_delay_s)
     if config.jitter:
         delay += random.uniform(0, delay * config.jitter_factor)
     return delay
@@ -136,6 +141,7 @@ def _compute_delay(attempt: int, config: RetryConfig) -> float:
 # ---------------------------------------------------------------------------
 # Synchronous retry
 # ---------------------------------------------------------------------------
+
 
 def retry_with_backoff(
     fn: Callable[..., Any],
@@ -188,6 +194,7 @@ def retry_with_backoff(
 # Asynchronous retry
 # ---------------------------------------------------------------------------
 
+
 async def async_retry_with_backoff(
     fn: Callable[..., Any],
     config: RetryConfig = DEFAULT_LLM_RETRY,
@@ -211,8 +218,7 @@ async def async_retry_with_backoff(
             if attempt < config.max_attempts - 1:
                 delay = _compute_delay(attempt, config)
                 logger.warning(
-                    "async_retry: attempt %d/%d failed (%s: %s). "
-                    "Retrying in %.2fs.",
+                    "async_retry: attempt %d/%d failed (%s: %s). Retrying in %.2fs.",
                     attempt + 1,
                     config.max_attempts,
                     type(exc).__name__,
@@ -236,6 +242,7 @@ async def async_retry_with_backoff(
 # Decorator
 # ---------------------------------------------------------------------------
 
+
 def retryable(
     config: RetryConfig = DEFAULT_LLM_RETRY,
 ) -> Callable[[F], F]:
@@ -252,8 +259,10 @@ def retryable(
         @retryable(DEFAULT_LLM_RETRY)
         async def call_llm(prompt: str) -> LLMResponse: ...
     """
+
     def decorator(fn: F) -> F:
         if asyncio.iscoroutinefunction(fn):
+
             @functools.wraps(fn)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 last_exc: Exception | None = None
@@ -276,8 +285,10 @@ def retryable(
                     except Exception as exc:
                         raise exc
                 raise RetryExhaustedError(config.max_attempts, last_exc)  # type: ignore[arg-type]
+
             return async_wrapper  # type: ignore[return-value]
         else:
+
             @functools.wraps(fn)
             def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
                 last_exc: Exception | None = None
@@ -300,6 +311,7 @@ def retryable(
                     except Exception as exc:
                         raise exc
                 raise RetryExhaustedError(config.max_attempts, last_exc)  # type: ignore[arg-type]
+
             return sync_wrapper  # type: ignore[return-value]
 
     return decorator

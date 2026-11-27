@@ -37,6 +37,7 @@
 #   This is the contract: every caller gets a clean session, and it is always
 #   returned to the pool when done.
 
+import importlib
 import logging
 import pathlib
 import re
@@ -334,8 +335,9 @@ def get_session_factory() -> async_sessionmaker:
 # queries, too expensive for the 50+ telemetry rows emitted per review.
 # The bare asyncpg pool is used only for high-throughput insert paths.
 # ---------------------------------------------------------------------------
-import asyncpg as _asyncpg
-from pgvector.asyncpg import register_vector as _register_vector
+# Imported here rather than at the top of the module to keep the import order.
+_asyncpg = importlib.import_module("asyncpg")
+_register_vector = importlib.import_module("pgvector.asyncpg").register_vector
 
 _tiger_pool: "_asyncpg.Pool | None" = None
 

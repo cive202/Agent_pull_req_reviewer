@@ -110,7 +110,9 @@ GOLDEN_DATASET: list[GoldenPR] = [
     GoldenPR(
         id="easy_approve_002",
         pr_title="Update README with installation instructions",
-        pr_description="Adds pip install step and Python version requirement to README.",
+        pr_description=(
+            "Adds pip install step and Python version requirement to README."
+        ),
         diff_snippet="""\
 --- a/README.md
 +++ b/README.md

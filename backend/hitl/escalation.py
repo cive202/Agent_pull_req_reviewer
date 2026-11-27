@@ -88,7 +88,8 @@ def should_escalate(
         security_agent_failed:   True if the security agent raised an exception
                                  or returned an error verdict.
         critical_agent_count:    Number of agents that returned CRITICAL_BLOCK verdict.
-        overall_confidence:      Weighted-average confidence across all agents (0.0–1.0).
+        overall_confidence:      Weighted-average confidence across all agents \
+(0.0–1.0).
         successful_agent_count:  Number of agents that completed without error.
         total_agent_count:       Total agents invoked (normally 4).
 

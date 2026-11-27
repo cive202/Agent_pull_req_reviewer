@@ -58,8 +58,11 @@ import logging
 
 from backend.config.settings import Settings, get_settings
 from backend.memory.embedder import EmbeddingError, embed_text
+
 # TIGER: was Qdrant search — now pgvectorscale DiskANN hybrid retrieval
-from backend.memory.tiger_client import get_tiger_memory  # replaces QdrantMemoryClient / search_similar_code
+from backend.memory.tiger_client import (
+    get_tiger_memory,
+)  # replaces QdrantMemoryClient / search_similar_code
 
 logger = logging.getLogger(__name__)
 
@@ -143,14 +146,17 @@ async def retrieve_context_for_diff(
     except EmbeddingError as e:
         logger.warning(
             "retrieve_context | embed_failed | repo=%s error=%s -> returning ''",
-            repo_full_name, str(e),
+            repo_full_name,
+            str(e),
         )
         return ""
     except Exception as e:
         # Defensive catch for unexpected errors (e.g. network timeout not wrapped)
         logger.warning(
             "retrieve_context | embed_unexpected_error | repo=%s error=%s: %s -> returning ''",
-            repo_full_name, type(e).__name__, e,
+            repo_full_name,
+            type(e).__name__,
+            e,
         )
         return ""
 
@@ -169,12 +175,15 @@ async def retrieve_context_for_diff(
 
     # Step 4: Filter by minimum similarity score.
     # (RAG-Architecture.md: "If both agree, confidence rises; if neither agrees, skip.")
-    relevant_results = [r for r in results if r.get("score", 0.0) >= MIN_SIMILARITY_SCORE]
+    relevant_results = [
+        r for r in results if r.get("score", 0.0) >= MIN_SIMILARITY_SCORE
+    ]
 
     if not relevant_results:
         logger.debug(
             "retrieve_context | no_relevant_results | repo=%s score_threshold=%.2f -> ''",
-            repo_full_name, MIN_SIMILARITY_SCORE,
+            repo_full_name,
+            MIN_SIMILARITY_SCORE,
         )
         return ""
 
@@ -183,7 +192,8 @@ async def retrieve_context_for_diff(
 
     logger.info(
         "retrieve_context | success | repo=%s chunks=%d",
-        repo_full_name, len(relevant_results),
+        repo_full_name,
+        len(relevant_results),
     )
 
     return context
@@ -192,6 +202,7 @@ async def retrieve_context_for_diff(
 # ---------------------------------------------------------------------------
 # PRIVATE HELPERS
 # ---------------------------------------------------------------------------
+
 
 def _format_context(results: list[dict]) -> str:
     """
@@ -222,7 +233,9 @@ def _format_context(results: list[dict]) -> str:
         if not chunk_text.strip():
             continue
 
-        lines.append(f"\n[File: {file_path} | from PR #{pr_number} | similarity: {score:.2f}]")
+        lines.append(
+            f"\n[File: {file_path} | from PR #{pr_number} | similarity: {score:.2f}]"
+        )
         lines.append(chunk_text)
         lines.append("---")
 

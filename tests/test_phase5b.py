@@ -230,7 +230,8 @@ def test_base_agent_uses_registry_as_primary():
     template_path = reg_module._TEMPLATES_ROOT / "security" / "v1.txt"
     expected = template_path.read_text(encoding="utf-8").strip()
     assert content == expected, (
-        "_get_prompt_with_fallback() should return registry content, not inline fallback"
+        "_get_prompt_with_fallback() should return registry content, not inline "
+        "fallback"
     )
 
 

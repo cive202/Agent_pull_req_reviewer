@@ -40,7 +40,8 @@ class TestAgent(BaseAgent):
         """
         Test coverage review instructions for the LLM.
 
-        PRIMARY SOURCE: backend/prompts/templates/test/v1.txt (loaded by PromptRegistry).
+        PRIMARY SOURCE: backend/prompts/templates/test/v1.txt (loaded by \
+PromptRegistry).
         This inline string is the FALLBACK used only when the templates directory is
         missing from the deployment. In normal operation this method is never called.
         (See BaseAgent._get_prompt_with_fallback() for the two-level strategy.)
@@ -53,14 +54,17 @@ but is not tested, or is tested poorly.
 WHAT TO LOOK FOR:
 
 1. MISSING TESTS FOR NEW CODE:
-   - A new public function, method, or class was added in src/ with no new test in tests/
+   - A new public function, method, or class was added in src/ with no new test in \
+tests/
    - A new API endpoint was added with no integration test
    - A new business rule was added with no unit test for that rule
    Suggestion format: "Add a test for [function_name] that covers [scenario]."
 
 2. MISSING TESTS FOR CHANGED LOGIC:
-   - An existing function's body was changed (logic change, not just a comment or rename)
-     but no test file was modified — the existing tests may no longer cover the new behavior
+   - An existing function's body was changed (logic change, not just a comment or \
+rename)
+     but no test file was modified — the existing tests may no longer cover the new \
+behavior
 
 3. EDGE CASE COVERAGE:
    - Tests that only cover the happy path when there are obvious error paths:
@@ -102,6 +106,7 @@ DO NOT REPORT:
 - Security issues (SecurityAgent's job)
 - Code quality issues (QualityAgent's job)
 - Missing docstrings (DocsAgent's job)
-- Tests that seem incomplete but you're not sure (keep confidence < 0.6 for uncertain findings)
+- Tests that seem incomplete but you're not sure (keep confidence < 0.6 for uncertain \
+findings)
 - Issues in already-tested code that wasn't modified in this PR
 """

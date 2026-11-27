@@ -370,7 +370,8 @@ class RegressionGate:
         if regression_rate > 0.05:
             reg_list = ", ".join(f"{eid}({d:+.2f})" for eid, d in regressions[:5])
             return False, (
-                f"Too many per-example regressions: {len(regressions)}/{len(current_scores)} "
+                "Too many per-example regressions: "
+                f"{len(regressions)}/{len(current_scores)} "
                 f"({regression_rate:.1%}) dropped by >{PER_EXAMPLE_REGRESSION}. "
                 f"Examples: {reg_list}"
             )

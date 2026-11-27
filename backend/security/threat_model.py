@@ -397,7 +397,8 @@ def assess_pr_diff(
                     vector=ThreatVector.PII_IN_DIFF,
                     severity=ThreatSeverity.HIGH,
                     description=(
-                        f"PII detected and redacted from diff: {', '.join(sorted(pii_kinds))}. "
+                        "PII detected and redacted from diff: "
+                        f"{', '.join(sorted(pii_kinds))}. "
                         "Agents will see placeholders, not raw values."
                     ),
                     evidence_snippet=f"pii_kinds={sorted(pii_kinds)}",
@@ -409,7 +410,8 @@ def assess_pr_diff(
                     vector=ThreatVector.API_KEY_EXPOSURE,
                     severity=ThreatSeverity.HIGH,
                     description=(
-                        f"Credential patterns detected and redacted: {', '.join(sorted(secret_kinds))}. "
+                        "Credential patterns detected and redacted: "
+                        f"{', '.join(sorted(secret_kinds))}. "
                         "Agents will see placeholders, not raw values."
                     ),
                     evidence_snippet=f"secret_kinds={sorted(secret_kinds)}",

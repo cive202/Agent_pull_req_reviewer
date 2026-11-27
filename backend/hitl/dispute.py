@@ -225,7 +225,8 @@ async def resolve_dispute(
     # If GitHub fails (401, 422, 404), we log and continue — the human decision
     # is already committed to Postgres. The operator can retry via the retry endpoint.
     #
-    # Real method: github_client.post_pr_review(repo, pr_number, payload: PostReviewPayload).
+    # Real method: github_client.post_pr_review(repo, pr_number, payload:
+    # PostReviewPayload).
     # PostReviewPayload requires commit_id (head SHA). HITLReview.review_id has
     # format "owner/repo:pr_number:commit_sha" — extract the SHA from there.
     posted = False
@@ -236,7 +237,8 @@ async def resolve_dispute(
         )
 
         # Map human verdict to GitHub review event.
-        # (demo-day-readiness pitfall #35: REQUEST_CHANGES fails when reviewer == PR author.
+        # (demo-day-readiness pitfall #35: REQUEST_CHANGES fails when reviewer == PR
+        # author.
         #  For HITL we use the same bot account rule. If bot account not set up,
         #  fall back to COMMENT as we did in Phase 8/18.)
         github_event_str = _human_verdict_to_github_event(request.human_verdict)

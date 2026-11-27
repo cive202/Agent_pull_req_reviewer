@@ -10,7 +10,8 @@
 #   hallucinate tool names, pass wrong argument types, or call write tools when only
 #   read access was intended. The registry solves this by:
 #     1. Being the ONLY place tools are defined (name, schema, handler — together)
-#     2. Validating tool names before execution (unknown tool = KeyError, not silent crash)
+#     2. Validating tool names before execution (unknown tool = KeyError, not silent
+#        crash)
 #     3. Enforcing typed input schemas so bad args are caught before the handler runs
 #
 # ARCHITECTURE (Clean Architecture — Interface Adapters layer):
@@ -25,8 +26,10 @@
 #   4 pre-registered tools (the deterministic ones that don't need LLM calls)
 #
 # WHAT DOES NOT LIVE HERE:
-#   - Capability scope enforcement (which agent can call which tool) -> capability_scope.py
-#   - Docker sandboxing for arbitrary code -> sandbox.py (subprocess for now, Docker in Phase 13)
+#   - Capability scope enforcement (which agent can call which tool) ->
+#     capability_scope.py
+#   - Docker sandboxing for arbitrary code -> sandbox.py (subprocess for now, Docker in
+#     Phase 13)
 #   - LLM calls -> tools/llm_client.py
 #
 # DEPENDENCY: core, models, config  (no upward deps — no imports from agents/)
@@ -61,7 +64,8 @@ class ToolSchema:
         description — human/LLM-readable purpose. MUST be precise (anti-pattern:
                       vague descriptions cause tool misuse — see wiki)
         input_schema — JSON Schema dict. Only "object" type with "properties" and
-                       "required" is supported right now (sufficient for all Phase 7 tools)
+                       "required" is supported right now (sufficient for all Phase 7 \
+tools)
         output_description — what the handler returns (helps agents interpret results)
     """
 
@@ -206,7 +210,8 @@ class ToolRegistry:
         # Handlers must return dicts — this is a hard invariant
         if not isinstance(result, dict):
             raise TypeError(
-                f"Tool '{name}' handler returned {type(result).__name__} instead of dict. "
+                f"Tool '{name}' handler returned {type(result).__name__} instead "
+                "of dict. "
                 "All tool handlers must return dict[str, Any]."
             )
 
@@ -407,7 +412,8 @@ _TOOL_RUN_SYNTAX_CHECK = ToolDefinition(
             "required": ["code", "language"],
         },
         output_description=(
-            '{"valid": bool, "errors": [str], "language": str, "execution_time_ms": int}'
+            '{"valid": bool, "errors": [str], "language": str, '
+            '"execution_time_ms": int}'
         ),
     ),
     handler=_run_syntax_check_handler,
@@ -452,7 +458,8 @@ def _search_similar_findings_handler(args: dict[str, Any]) -> dict[str, Any]:
         # TIGER: was qdrant_client.search_similar_code
         from backend.memory.tiger_client import get_tiger_memory
         # TODO: wire embedding + repo args — see context_retriever.py for pattern
-        # chunks = await get_tiger_memory().search(query_embedding, repo=repo, hybrid=True, query_text=query_text, top_k=5)
+        # chunks = await get_tiger_memory().search(query_embedding, repo=repo,
+        # hybrid=True, query_text=query_text, top_k=5)
 
         embedding = embed_text(query)
         raw_results = get_tiger_memory().search(
@@ -503,7 +510,9 @@ _TOOL_SEARCH_SIMILAR = ToolDefinition(
                 },
                 "limit": {
                     "type": "integer",
-                    "description": "Max number of results to return (default: 5, max: 20).",
+                    "description": (
+                        "Max number of results to return (default: 5, max: 20)."
+                    ),
                     "default": 5,
                 },
             },

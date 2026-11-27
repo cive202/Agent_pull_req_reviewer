@@ -94,7 +94,8 @@ async def make_test_session(engine) -> AsyncSession:
 def _make_agent_results(
     critical_count: int = 0, verdict: str = "REQUEST_CHANGES"
 ) -> list[dict]:
-    """Build a minimal agent_results list with the requested number of CRITICAL items."""
+    """Build a minimal agent_results list with the requested number of CRITICAL \
+items."""
     results = []
     severities = ["CRITICAL"] * critical_count
     # fill the rest with HIGH so we always have 4 agents

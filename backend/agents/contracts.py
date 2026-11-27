@@ -79,7 +79,8 @@ from typing import Any
 #   FindingSeverity is per-finding (individual issue severity).
 #   AgentVerdict is per-agent (overall conclusion of this domain expert).
 #   An agent might find 3 MEDIUM issues but still conclude APPROVE (no blockers).
-#   The mapping: CRITICAL finding -> CRITICAL_BLOCK, HIGH -> REQUEST_CHANGES, else -> APPROVE.
+#   The mapping: CRITICAL finding -> CRITICAL_BLOCK, HIGH -> REQUEST_CHANGES, else ->
+#   APPROVE.
 # =============================================================================
 
 
@@ -94,7 +95,8 @@ class AgentVerdict(str, Enum):
     # No HIGH or CRITICAL findings. Agent clears its domain.
     APPROVE = "approve"
 
-    # At least one HIGH finding. Warrants requesting changes, but not a full HITL escalation.
+    # At least one HIGH finding. Warrants requesting changes, but not a full HITL
+    # escalation.
     REQUEST_CHANGES = "request_changes"
 
     # At least one CRITICAL finding. Safety-Threshold Rule: 2+ agents must agree
@@ -339,7 +341,8 @@ class VerdictRecord:
 #
 # This is the Humble Object pattern (Clean-Architecture wiki):
 #   "Separate the logic (testable) from the I/O (state update side effect)."
-#   The logic lives in _compute_aggregation() (pure function, returns AggregationResult).
+#   The logic lives in _compute_aggregation() (pure function, returns
+#   AggregationResult).
 #   The node aggregate_results() calls it and unpacks the result into state.
 # =============================================================================
 
@@ -358,7 +361,8 @@ class AggregationResult:
 
     # The final system-level verdict.
     # APPROVE / REQUEST_CHANGES / NEEDS_HUMAN_REVIEW
-    # (This is ReviewVerdict, not AgentVerdict — the system verdict, not a per-agent verdict.)
+    # (This is ReviewVerdict, not AgentVerdict — the system verdict, not a per-agent
+    # verdict.)
     verdict: Any  # ReviewVerdict enum — imported in nodes.py to avoid circular
 
     # Per-agent breakdown for the audit log.

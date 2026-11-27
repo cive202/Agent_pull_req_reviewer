@@ -100,7 +100,8 @@ def validate_github_signature(
     if not hmac.compare_digest(expected_signature, received_signature):
         raise WebhookValidationError(
             "Signature mismatch. The request body or webhook secret is incorrect. "
-            "Verify that GITHUB_WEBHOOK_SECRET matches the secret in GitHub webhook settings."
+            "Verify that GITHUB_WEBHOOK_SECRET matches the secret in GitHub "
+            "webhook settings."
         )
 
     # If we reach here, validation passed. Return None implicitly.

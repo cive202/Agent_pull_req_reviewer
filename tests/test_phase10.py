@@ -20,11 +20,27 @@ from pathlib import Path
 
 import pytest
 
+from backend.observability.events import ReviewEvent
+from backend.observability.tracing import (
+    TraceContext,
+    traced,
+)
+from backend.observability.logging import (
+    get_logger,
+    log_llm_call,
+    log_review_verdict,
+    log_tool_call,
+)
+from backend.observability.alerting import (
+    AlertLevel,
+    AlertManager,
+    MetricSnapshot,
+)
+from backend.observability.audit import AuditLogger
+
 # ─────────────────────────────────────────────────────────────────────────────
 # GROUP A: Events (3 tests)
 # ─────────────────────────────────────────────────────────────────────────────
-
-from backend.observability.events import ReviewEvent
 
 
 def test_review_event_is_str():
@@ -63,11 +79,6 @@ def test_review_event_dot_naming_convention():
 # ─────────────────────────────────────────────────────────────────────────────
 # GROUP B: Tracing (5 tests)
 # ─────────────────────────────────────────────────────────────────────────────
-
-from backend.observability.tracing import (
-    TraceContext,
-    traced,
-)
 
 
 def test_trace_context_create_and_current():
@@ -139,13 +150,6 @@ def test_trace_context_cost_rollup():
 # ─────────────────────────────────────────────────────────────────────────────
 # GROUP C: Logging (4 tests)
 # ─────────────────────────────────────────────────────────────────────────────
-
-from backend.observability.logging import (
-    get_logger,
-    log_llm_call,
-    log_review_verdict,
-    log_tool_call,
-)
 
 
 def test_structured_logger_returns_json_compatible_dict():
@@ -238,12 +242,6 @@ def test_log_review_verdict_rounds_cost():
 # GROUP D: Alerting (5 tests)
 # ─────────────────────────────────────────────────────────────────────────────
 
-from backend.observability.alerting import (
-    AlertLevel,
-    AlertManager,
-    MetricSnapshot,
-)
-
 
 def test_alert_level_order():
     """PAGE must be more severe than URGENT > WARNING > INFO."""
@@ -298,8 +296,6 @@ def test_highest_level_returns_page_when_multiple_fired():
 # ─────────────────────────────────────────────────────────────────────────────
 # GROUP E: Audit (3 tests)
 # ─────────────────────────────────────────────────────────────────────────────
-
-from backend.observability.audit import AuditLogger
 
 
 def test_audit_logger_write_and_read(tmp_path: Path):

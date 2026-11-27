@@ -49,7 +49,10 @@ assert finding.severity == FindingSeverity.HIGH
 assert finding.category == FindingCategory.SECURITY
 assert finding.confidence == 0.92
 print(
-    f"  AgentFinding: severity={finding.severity.value} category={finding.category.value}  OK"
+    (
+        f"  AgentFinding: severity={finding.severity.value} "
+        f"category={finding.category.value}  OK"
+    )
 )
 
 # ── TEST 3: to_state_dict() returns plain strings ─────────────────────────────
@@ -170,7 +173,10 @@ assert sec_cfg.provider == "anthropic" and "claude" in sec_cfg.model_name
 assert sec_cfg.context_budget_tokens == 8000
 assert qual_cfg.provider == "openai" and "gpt-4o-mini" in qual_cfg.model_name
 print(
-    f"  SECURITY: {sec_cfg.provider}/{sec_cfg.model_name} budget={sec_cfg.context_budget_tokens}  OK"
+    (
+        f"  SECURITY: {sec_cfg.provider}/{sec_cfg.model_name} "
+        f"budget={sec_cfg.context_budget_tokens}  OK"
+    )
 )
 print(f"  QUALITY:  {qual_cfg.provider}/{qual_cfg.model_name}  OK")
 
@@ -231,7 +237,10 @@ assert result.tokens_used == 920
 assert result.error_message is None
 print(f"  SecurityAgent.analyze() -> findings={len(result.findings)}")
 print(
-    f"  severity={result.findings[0].severity.value} conf={result.confidence:.2f} tokens={result.tokens_used}  OK"
+    (
+        f"  severity={result.findings[0].severity.value} conf={result.confidence:.2f} "
+        f"tokens={result.tokens_used}  OK"
+    )
 )
 print("\n" + "=" * 60)
 print("PHASE 5 SMOKE TEST: ALL ASSERTIONS PASSED")

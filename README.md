@@ -245,5 +245,3 @@ frontend/           Next.js dashboard
 - HITL threshold is confidence-weighted — low-confidence findings queue for human review
 
 ---
-
-Built by [Ayush Singh](https://github.com/ayush488-glitch)

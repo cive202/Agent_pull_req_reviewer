@@ -23,7 +23,8 @@
 #   We await every database call. Never use synchronous SQLAlchemy in async context.
 #
 # DEPENDENCY DIRECTION CHECK:
-#   repository.py imports from: backend.database.postgres (session), backend.database.models
+#   repository.py imports from: backend.database.postgres (session),
+#   backend.database.models
 #   repository.py does NOT import from: agents, orchestrator, tools
 #   This is correct — repository is at the tools/memory layer.
 
@@ -320,7 +321,8 @@ async def list_reviews(
     Returns a paginated list of PRReviewRecords with an accurate total count.
 
     PERFORMANCE NOTE (from Storage-Engines.md wiki, "Index Design"):
-    PRReviewRecord.repo_full_name has a standalone index (ix_pr_review_records_repo_full_name
+    PRReviewRecord.repo_full_name has a standalone index \
+(ix_pr_review_records_repo_full_name
     defined in models.py). Filtering by repo_full_name uses that index efficiently.
     Without the index: full table scan across potentially thousands of reviews.
 

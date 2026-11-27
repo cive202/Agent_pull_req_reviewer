@@ -69,7 +69,8 @@ async def require_auth(
     WHY SEPARATE 401 vs 403?
     (WIKI: Security-Engineering)
       401 Unauthorized: no credentials provided — client should authenticate.
-      403 Forbidden: credentials provided but insufficient — client is known but rejected.
+      403 Forbidden: credentials provided but insufficient — client is known but \
+rejected.
     Distinguishing them makes debugging easier for API consumers.
 
     TIMING ATTACK CONSIDERATION:

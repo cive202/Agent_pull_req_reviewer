@@ -56,7 +56,8 @@ logger = logging.getLogger(__name__)
 MAX_EMBED_CHARS = 8_000
 
 # Embedding vector dimensionality for text-embedding-3-small.
-# Must match the Tiger Cloud code_chunks table VECTOR dimension (defined in 2026-06-tiger-init.sql).
+# Must match the Tiger Cloud code_chunks table VECTOR dimension (defined in
+# 2026-06-tiger-init.sql).
 EMBEDDING_DIMENSIONS = 1536
 
 
@@ -67,7 +68,8 @@ class EmbeddingError(Exception):
     Callers (specifically context_retriever.py) catch this and return ""
     (graceful degradation: no RAG context, review still runs).
     Never propagates to the user or crashes the review.
-    (Production-Hardening.md: "Circuit Breaker — fail gracefully on external API failure.")
+    (Production-Hardening.md: "Circuit Breaker — fail gracefully on external API \
+failure.")
     """
 
     pass
